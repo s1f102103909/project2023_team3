@@ -5,6 +5,9 @@ import wave
 import numpy as np
 import time
 import audioop
+import gtts
+from playsound import playsound
+from io import BytesIO
 
 #api key
 openai.api_key = '234beG84Ybh7BeumEJr6kfmjPSulkprNO9a_BRS89Ai922HJmqVkS7RYt29B3r_YtvnTcegVG7Jczx06iQ6cHzw'
@@ -73,3 +76,19 @@ def speech_to_text(filepath):
     
     # 変換後のテキスト出力
     return response.text
+
+
+def text_to_speech():
+    # file を保存してから音声を流す
+
+    # text入力 -> tts(音声ファイル)
+    tts = gtts.gTTS("hello world",lang="en") # Janpanese : ja;
+    # 音声ファイル保存
+    tts.save("/soundfile/hello.mp3")
+    # play
+    playsound("/soundfile/hello.mp3")
+
+    # 音声を直接流す
+    mp3_fp = BytesIO()
+    tts = gtts.gTTS("hello world",lang="en")
+    tts.write_to_fp(mp3_fp)
