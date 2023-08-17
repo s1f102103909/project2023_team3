@@ -26,6 +26,7 @@ def interview_practice(request):
         response = generate_answer(prompt)
         text_to_speech(response)
         chat_results = response
+        text_to_speech(chat_results)
             
     else:
         form = ChatForm()
