@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
+from .tests import text_to_speech
 
 # Create your views here.
 
@@ -23,6 +24,7 @@ def interview_practice(request):
                 ・私の回答に1つ1つに、採点を行なってください。
                  """
         response = generate_answer(prompt)
+        text_to_speech(response)
         chat_results = response
             
     else:
