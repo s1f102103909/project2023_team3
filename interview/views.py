@@ -26,7 +26,7 @@ def interview_practice(request):
                  """
         response = generate_answer(prompt)
         res = response.replace('面接官:', '')
-        text_to_speech(res)
+        google_TTS(res)
         chat_results = response
             
     else:
