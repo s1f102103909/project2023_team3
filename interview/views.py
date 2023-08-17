@@ -6,7 +6,6 @@ from .tests import generate_answer
 import cv2
 import threading
 from django.views import View
-from django.http import StreamingHttpResponse
 
 # Create your views here.
 
@@ -37,10 +36,9 @@ def interview_practice(request):
         'chat_results' : chat_results
     }
     return HttpResponse(template.render(context, request))
-    display_camera()
 
 class CameraView(View):
-    template_name = 'practice.html'
+    template_name = 'practice.html'  # practice.html を指定
 
     def get(self, request, *args, **kwargs):
         template = loader.get_template(self.template_name)
@@ -72,14 +70,3 @@ class VideoCamera:
 
 camera = VideoCamera()
 camera.start()
-
-def get_frame(request):
-    def generate():
-        while True:
-            frame = camera.get_frame()
-            if frame is not None:
-                _, jpeg = cv2.imencode('.jpg', frame)
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n')
-
-    return StreamingHttpResponse(generate(), content_type='multipart/x-mixed-replace; boundary=frame')
