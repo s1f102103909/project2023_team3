@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
+from .tests import record_video
 
 # Create your views here.
 
