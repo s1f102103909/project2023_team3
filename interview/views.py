@@ -3,7 +3,10 @@ from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
-from .tests import display_camera
+import cv2
+import threading
+from django.views import View
+from django.http import StreamingHttpResponse
 
 # Create your views here.
 
@@ -35,3 +38,48 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
     display_camera()
+
+class CameraView(View):
+    template_name = 'camera.html'
+
+    def get(self, request, *args, **kwargs):
+        template = loader.get_template(self.template_name)
+        return HttpResponse(template.render({}, request))
+
+class VideoCamera:
+    def __init__(self):
+        self.video = cv2.VideoCapture(0)
+        self.frame = None
+        self.is_running = True
+
+    def start(self):
+        thread = threading.Thread(target=self._capture_frames)
+        thread.start()
+
+    def stop(self):
+        self.is_running = False
+        self.video.release()
+
+    def _capture_frames(self):
+        while self.is_running:
+            ret, frame = self.video.read()
+            if not ret:
+                break
+            self.frame = frame
+
+    def get_frame(self):
+        return self.frame
+
+camera = VideoCamera()
+camera.start()
+
+def get_frame(request):
+    def generate():
+        while True:
+            frame = camera.get_frame()
+            if frame is not None:
+                _, jpeg = cv2.imencode('.jpg', frame)
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n')
+
+    return StreamingHttpResponse(generate(), content_type='multipart/x-mixed-replace; boundary=frame')

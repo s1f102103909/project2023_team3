@@ -13,5 +13,19 @@
     </form>
 
     {{ chat_results }}
+
+    <img id="camera-feed" src="" alt="Camera Feed" width="640" height="480">
+    <script>
+        var img = document.getElementById('camera-feed');
+        function updateCameraFeed() {
+            fetch('/get_frame/')
+                .then(response => response.blob())
+                .then(blob => {
+                    img.src = URL.createObjectURL(blob);
+                    setTimeout(updateCameraFeed, 100);
+                });
+        }
+        updateCameraFeed();
+    </script>
 </body>
 </html>
