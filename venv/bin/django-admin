@@ -1,4 +1,4 @@
-#!/Users/iniad2/Documents/GitHub/project2023_team3/venv/bin/python3
+#!/mnt/c/Users/hikaru/Documents/cs_exercise/project2023_team3/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
