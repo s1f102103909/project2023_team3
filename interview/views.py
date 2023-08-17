@@ -4,6 +4,7 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 from .tests import text_to_speech
+from .tests import google_TTS
 
 # Create your views here.
 
