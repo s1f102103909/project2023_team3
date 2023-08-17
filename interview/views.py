@@ -40,7 +40,7 @@ def interview_practice(request):
     display_camera()
 
 class CameraView(View):
-    template_name = 'camera.html'
+    template_name = 'practice.html'
 
     def get(self, request, *args, **kwargs):
         template = loader.get_template(self.template_name)
