@@ -29,6 +29,7 @@ def generate_answer(prompt):
 
 def text_to_speech(response):
     engine = pyttsx3.init()
+    engine.setProperty("rate", 100)
     engine.say("{}".format(response))
     engine.runAndWait()
 

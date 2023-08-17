@@ -24,7 +24,8 @@ def interview_practice(request):
                 ・私の回答に1つ1つに、採点を行なってください。
                  """
         response = generate_answer(prompt)
-        text_to_speech(response)
+        res = response.replace('面接官:', '')
+        text_to_speech(res)
         chat_results = response
             
     else:
