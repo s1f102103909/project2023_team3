@@ -29,7 +29,6 @@ def generate_answer(prompt):
     answer = response['choices'][0]['message']['content']
     return answer
 
-
 def text_to_speech(response):
     # file を保存してから音声を流す
     # text入力 -> tts(音声ファイル)
