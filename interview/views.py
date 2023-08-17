@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
-from .tests import record_video
+from .tests import display_camera
 
 # Create your views here.
 
@@ -34,5 +34,4 @@ def interview_practice(request):
         'chat_results' : chat_results
     }
     return HttpResponse(template.render(context, request))
-
-
+    display_camera()

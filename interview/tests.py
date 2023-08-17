@@ -28,36 +28,25 @@ def generate_answer(prompt):
     return answer
 
 
-def record_video(output_file, duration=10):
+def display_camera():
     # カメラキャプチャの初期化
     cap = cv2.VideoCapture(0)
 
-    # ビデオ書き込みの設定
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter(output_file, fourcc, 20.0, (640, 480))
-
-    # 指定した秒数だけ録画を行う
-    start_time = cv2.getTickCount()
-    while (cv2.getTickCount() - start_time) / cv2.getTickFrequency() < duration:
+    while True:
+        # フレームをキャプチャ
         ret, frame = cap.read()
+
         if ret:
             # フレームを表示
-            cv2.imshow('Recording', frame)
-            # フレームをビデオに書き込み
-            out.write(frame)
-        else:
-            break
+            cv2.imshow('Camera Feed', frame)
 
-        # 'q' キーが押されたら録画終了
+        # 'q' キーが押されたら表示終了
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     # 後処理
     cap.release()
-    out.release()
     cv2.destroyAllWindows()
 
-# メインの録画処理を呼び出し
-output_filename = 'output.avi'
-record_duration = 10  # 録画する秒数
-record_video(output_filename, record_duration)
+# メインの表示処理を呼び出し
+#display_camera()
