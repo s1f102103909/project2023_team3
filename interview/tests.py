@@ -34,7 +34,7 @@ class CameraView(View):
         # カメラの初期化
         cap = cv2.VideoCapture(0)  # 内部カメラにアクセスする場合、0を指定
         if not cap.isOpened():
-            return HttpResponse("Cannot access camera")
+            return StreamingHttpResponse("Cannot access camera")
 
         def generate_frames():
             while True:
