@@ -15,14 +15,14 @@
     {{ chat_results }}
     <br>
     <h2>Camera Feed</h2>
-    <img id="camera-feed" src="" alt="Camera Feed" width="640" height="480">
+    <video id="camera-feed" autoplay width="640" height="480"></video>
     <script>
-        var img = document.getElementById('camera-feed');
+        var video = document.getElementById('camera-feed');
         function updateCameraFeed() {
             fetch('/get_frame/')
                 .then(response => response.blob())
                 .then(blob => {
-                    img.src = URL.createObjectURL(blob);
+                    video.src = URL.createObjectURL(blob);
                     setTimeout(updateCameraFeed, 100);
                 });
         }
