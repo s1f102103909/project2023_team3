@@ -6,6 +6,7 @@ from .tests import generate_answer
 import cv2
 import threading
 from django.views import View
+from django.http import StreamingHttpResponse
 
 # Create your views here.
 
@@ -38,35 +39,22 @@ def interview_practice(request):
     return HttpResponse(template.render(context, request))
 
 class CameraView(View):
-    template_name = 'practice.html'  # practice.html を指定
+    def get(self, request):
+        # カメラの初期化
+        cap = cv2.VideoCapture(0)  # 内部カメラにアクセスする場合、0を指定
+        if not cap.isOpened():
+            return HttpResponse("Cannot access camera")
 
-    def get(self, request, *args, **kwargs):
-        template = loader.get_template(self.template_name)
-        return HttpResponse(template.render({}, request))
+        def generate_frames():
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
 
-class VideoCamera:
-    def __init__(self):
-        self.video = cv2.VideoCapture(0)
-        self.frame = None
-        self.is_running = True
+                ret, buffer = cv2.imencode('.jpg', frame)
+                if ret:
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            cap.release()
 
-    def start(self):
-        thread = threading.Thread(target=self._capture_frames)
-        thread.start()
-
-    def stop(self):
-        self.is_running = False
-        self.video.release()
-
-    def _capture_frames(self):
-        while self.is_running:
-            ret, frame = self.video.read()
-            if not ret:
-                break
-            self.frame = frame
-
-    def get_frame(self):
-        return self.frame
-
-camera = VideoCamera()
-camera.start()
+        return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')

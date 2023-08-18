@@ -4,6 +4,8 @@ from django.test import TestCase
 import os
 import openai
 import cv2
+from django.http import StreamingHttpResponse
+from django.views import View
 
 API_KEY = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
@@ -27,26 +29,23 @@ def generate_answer(prompt):
     answer = response['choices'][0]['message']['content']
     return answer
 
+class CameraView(View):
+    def get(self, request):
+        # カメラの初期化
+        cap = cv2.VideoCapture(0)  # 内部カメラにアクセスする場合、0を指定
+        if not cap.isOpened():
+            return HttpResponse("Cannot access camera")
 
-def display_camera():
-    # カメラキャプチャの初期化
-    cap = cv2.VideoCapture(0)
+        def generate_frames():
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
 
-    while True:
-        # フレームをキャプチャ
-        ret, frame = cap.read()
+                ret, buffer = cv2.imencode('.jpg', frame)
+                if ret:
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            cap.release()
 
-        if ret:
-            # フレームを表示
-            cv2.imshow('Camera Feed', frame)
-
-        # 'q' キーが押されたら表示終了
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    # 後処理
-    cap.release()
-    cv2.destroyAllWindows()
-
-# メインの表示処理を呼び出し
-#display_camera()
+        return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
