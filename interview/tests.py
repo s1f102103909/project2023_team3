@@ -5,6 +5,7 @@ import os
 import openai
 import cv2
 from django.http import StreamingHttpResponse
+from django.http import HttpResponse
 from django.views import View
 
 API_KEY = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"

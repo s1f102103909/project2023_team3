@@ -7,6 +7,7 @@ import cv2
 import threading
 from django.views import View
 from django.http import StreamingHttpResponse
+from django.template.response import TemplateResponse
 
 # Create your views here.
 
@@ -38,12 +39,40 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 
+class CameraStreamView(View):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.video_capture = cv2.VideoCapture(0)  # 0は内蔵カメラを示します
+
+    def __del__(self):
+        self.video_capture.release()
+
+    def get_frame(self):
+        ret, frame = self.video_capture.read()
+        if ret:
+            _, jpeg_frame = cv2.imencode('.jpg', frame)
+            return jpeg_frame.tobytes()
+        return None
+
+    def get(self, request, *args, **kwargs):
+        return TemplateResponse(request, 'camerastream/practice.html')
+
+    def stream(self, request, *args, **kwargs):
+        return StreamingHttpResponse(self.stream_generator(), content_type="multipart/x-mixed-replace;boundary=frame")
+
+    def stream_generator(self):
+        while True:
+            frame = self.get_frame()
+            if frame:
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
 class CameraView(View):
     def get(self, request):
         # カメラの初期化
         cap = cv2.VideoCapture(0)  # 内部カメラにアクセスする場合、0を指定
         if not cap.isOpened():
-            return HttpResponse("Cannot access camera")
+            return StreamingHttpResponse("Cannot access camera")
 
         def generate_frames():
             while True:
