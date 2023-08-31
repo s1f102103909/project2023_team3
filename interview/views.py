@@ -4,6 +4,8 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 from .tests import text_to_speech
+from .tests import start
+from .tests import speech_to_text
 
 # Create your views here.
 
@@ -27,6 +29,9 @@ def interview_practice(request):
         res = response.replace('面接官:', '')
         text_to_speech(res)
         chat_results = response
+        filePath = start()
+        speech_to_text(filePath)
+
             
     else:
         form = ChatForm()
