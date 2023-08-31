@@ -60,3 +60,27 @@ class CameraView(View):
             cap.release()
 
         return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
+    
+cap = cv2.VideoCapture(0)
+
+# 映像保存の設定
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # 映像を保存
+    out.write(frame)
+
+    # 画面に映像を表示
+    cv2.imshow('Frame', frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+out.release()
+cv2.destroyAllWindows()

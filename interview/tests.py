@@ -3,8 +3,6 @@ from django.test import TestCase
 # Create your tests here.
 import os
 import openai
-import cv2
-from django.http import StreamingHttpResponse
 from django.http import HttpResponse
 from django.views import View
 

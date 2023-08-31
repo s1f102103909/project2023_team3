@@ -14,7 +14,7 @@
 
     {{ chat_results }}
     <br>
-    <h2>Camera Feed</h2>
+    <h4>Camera</h4>
     <video id="camera-feed" autoplay width="640" height="480"></video>
     <script>
         var video = document.getElementById('camera-feed');
@@ -27,6 +27,22 @@
                 });
         }
         updateCameraFeed();
+    </script>
+    <h1>Camera Practice</h1>
+    <div id="video-container">
+        <video id="camera-feed" autoplay></video>
+    </div>
+    <script>
+        const video = document.getElementById('camera-feed');
+        const constraints = { video: true };
+
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Error accessing camera:', error);
+            });
     </script>
 </body>
 </html>
