@@ -44,6 +44,8 @@ class CameraView(View):
         def generate_frames():
             # カメラの初期化
             cap = cv2.VideoCapture(0)  # 内部カメラにアクセスする場合、0を指定
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
             if not cap.isOpened():
                 yield b'Cannot access camera'
 
