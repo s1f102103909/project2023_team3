@@ -39,33 +39,6 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 
-class CameraStreamView(View):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.video_capture = cv2.VideoCapture(0)  # 0は内蔵カメラを示します
-
-    def __del__(self):
-        self.video_capture.release()
-
-    def get_frame(self):
-        ret, frame = self.video_capture.read()
-        if ret:
-            _, jpeg_frame = cv2.imencode('.jpg', frame)
-            return jpeg_frame.tobytes()
-        return None
-
-    def get(self, request, *args, **kwargs):
-        return TemplateResponse(request, 'camerastream/practice.html')
-
-    def stream(self, request, *args, **kwargs):
-        return StreamingHttpResponse(self.stream_generator(), content_type="multipart/x-mixed-replace;boundary=frame")
-
-    def stream_generator(self):
-        while True:
-            frame = self.get_frame()
-            if frame:
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 class CameraView(View):
     def get(self, request):
