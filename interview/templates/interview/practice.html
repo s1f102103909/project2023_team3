@@ -6,31 +6,9 @@
     <title>Document</title>
 </head>
 <body>
-    <form method="POST">
-        {% csrf_token %}
-
-        <button type="submit">練習開始</button>
-    </form>
-
-    {{ chat_results }}
-    <br>
-    <h4>Camera</h4>
-    <video id="camera-feed" autoplay width="640" height="480"></video>
-    <script>
-        var video = document.getElementById('camera-feed');
-        function updateCameraFeed() {
-            fetch('/get_frame/')
-                .then(response => response.blob())
-                .then(blob => {
-                    video.src = URL.createObjectURL(blob);
-                    setTimeout(updateCameraFeed, 100);
-                });
-        }
-        updateCameraFeed();
-    </script>
     <h1>Camera Practice</h1>
     <div id="video-container">
-        <video id="camera-feed" autoplay></video>
+        <video id="camera-feed" autoplay width="640" height="480"></video>
     </div>
     <script>
         const video = document.getElementById('camera-feed');
@@ -44,5 +22,28 @@
                 console.error('Error accessing camera:', error);
             });
     </script>
+
+    <h4>Camera Stream</h4>
+    <video id="camera-stream" autoplay controls></video>
+    <script>
+        var cameraStream = document.getElementById('camera-stream');
+        function updateCameraStream() {
+            fetch('/get_frame/')
+                .then(response => response.blob())
+                .then(blob => {
+                    cameraStream.src = URL.createObjectURL(blob);
+                    setTimeout(updateCameraStream, 100);
+                });
+        }
+        updateCameraStream();
+    </script>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <button type="submit">練習開始</button>
+    </form>
+
+    {{ chat_results }}
 </body>
 </html>
