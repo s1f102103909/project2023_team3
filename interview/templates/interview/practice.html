@@ -6,6 +6,14 @@
     <title>Document</title>
 </head>
 <body>
+    <form method="POST">
+        {% csrf_token %}
+
+        <button type="submit">練習開始</button>
+    </form>
+
+    {{ chat_results }}
+    <br>
     <h1>Camera Practice</h1>
     <div id="video-container">
         <video id="camera-feed" autoplay width="640" height="480"></video>
@@ -38,12 +46,5 @@
         updateCameraStream();
     </script>
 
-    <form method="POST">
-        {% csrf_token %}
-
-        <button type="submit">練習開始</button>
-    </form>
-
-    {{ chat_results }}
 </body>
 </html>
