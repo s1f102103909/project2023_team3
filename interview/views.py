@@ -4,7 +4,6 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 from .tests import text_to_speech
-from .tests import google_TTS
 
 # Create your views here.
 
@@ -26,7 +25,7 @@ def interview_practice(request):
                  """
         response = generate_answer(prompt)
         res = response.replace('面接官:', '')
-        google_TTS(res)
+        text_to_speech(res)
         chat_results = response
             
     else:
