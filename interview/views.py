@@ -84,3 +84,10 @@ while cap.isOpened():
 cap.release()
 out.release()
 cv2.destroyAllWindows()
+
+from django.shortcuts import render
+
+def display_video(request):
+    video_path = '/path/to/output.avi'  # output.avi の実際のパスに置き換えてください
+    context = {'video_path': video_path}
+    return render(request, 'video_display.html', context)
