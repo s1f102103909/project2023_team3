@@ -75,9 +75,6 @@ while cap.isOpened():
     # 映像を保存
     out.write(frame)
 
-    # 画面に映像を表示
-    cv2.imshow('Frame', frame)
-
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
