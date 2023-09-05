@@ -4,8 +4,6 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 from .tests import text_to_speech
-from .tests import start
-from .tests import speech_to_text
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -16,33 +14,6 @@ import io
 
 def home(request):
     return render(request, 'interview/home.html', {}) 
-
-@csrf_exempt
-def transcribe_audio(request):
-    if request.method == 'POST':
-        audio_file = request.FILES['audio']  
-        if not audio_file.name.endswith('.wav'):
-            return JsonResponse({'error': 'Invalid file format: ' + audio_file.name}, status=400)
-        
-        # ファイルをバイナリ形式で読み込み
-        file = io.BytesIO(audio_file.read())
-        
-        # blobデータをaudiosegmentに変換
-        audio = AudioSegment.from_file(file, format='wav')
-        
-        # SpeechRecognitionで使える形式（wav形式）に変換
-        binary_sound = io.BytesIO()
-        binary_sound.name = 'audio.wav'
-        audio.export(binary_sound, format='wav')
-        binary_sound.seek(0)
-        
-        r = sr.Recognizer()
-        audio_data = r.record(binary_sound)
-        text = r.recognize_google(audio_data, language='ja-JP')
-
-        return JsonResponse({'transcription': text})
-    else:
-        return JsonResponse({'error': 'このエンドポイントはPOSTメソッドでのみアクセス可能です。'}, status=405)
 
 def interview_practice(request):
     chat_results = ""
@@ -71,20 +42,24 @@ def interview_practice(request):
         'chat_results' : chat_results
     }
     return HttpResponse(template.render(context, request))
-
+import json
 
 @csrf_exempt
 def process_text(request):
     if request.method == 'POST':
-        text = request.POST.get('text')
+        #text = request.POST.get('text')
         # テキストの処理を実行
         # ...
         # 応答を返す
 
         # 処理されたテキストをセッションに保存
-        request.session['processed_text'] = text
+        #request.session['processed_text'] = text
         
-        return JsonResponse({'message': text })
-    else:
-        return JsonResponse({'message': 'Invalid request method'})
-
+        #return JsonResponse({'message': text })
+    #else:
+        #return JsonResponse({'message': 'Invalid request method'})
+        body_unicode = request.body.decode('utf-8')
+        body_data = json.loads(body_unicode)
+        text = body_data['text']
+        response = generate_answer(text)
+        return JsonResponse({'message': response})
