@@ -6,12 +6,43 @@ from .tests import generate_answer
 from .tests import text_to_speech
 from .tests import start
 from .tests import speech_to_text
-from .tests import record_js
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import speech_recognition as sr
+from pydub import AudioSegment
+import io
 # Create your views here.
 
 def home(request):
     return render(request, 'interview/home.html', {}) 
+
+@csrf_exempt
+def transcribe_audio(request):
+    if request.method == 'POST':
+        audio_file = request.FILES['audio']  
+        if not audio_file.name.endswith('.wav'):
+            return JsonResponse({'error': 'Invalid file format: ' + audio_file.name}, status=400)
+        
+        # ファイルをバイナリ形式で読み込み
+        file = io.BytesIO(audio_file.read())
+        
+        # blobデータをaudiosegmentに変換
+        audio = AudioSegment.from_file(file, format='wav')
+        
+        # SpeechRecognitionで使える形式（wav形式）に変換
+        binary_sound = io.BytesIO()
+        binary_sound.name = 'audio.wav'
+        audio.export(binary_sound, format='wav')
+        binary_sound.seek(0)
+        
+        r = sr.Recognizer()
+        audio_data = r.record(binary_sound)
+        text = r.recognize_google(audio_data, language='ja-JP')
+
+        return JsonResponse({'transcription': text})
+    else:
+        return JsonResponse({'error': 'このエンドポイントはPOSTメソッドでのみアクセス可能です。'}, status=405)
 
 def interview_practice(request):
     chat_results = ""
@@ -30,8 +61,6 @@ def interview_practice(request):
         res = response.replace('面接官:', '')
         text_to_speech(res)
         chat_results = response
-        filePath = record_js()
-        speech_to_text(filePath)
 
             
     else:
@@ -43,4 +72,15 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 
+
+@csrf_exempt
+def process_text(request):
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        # テキストの処理を実行
+        # ...
+        # 応答を返す
+        return JsonResponse({'message': text })
+    else:
+        return JsonResponse({'message': 'Invalid request method'})
 

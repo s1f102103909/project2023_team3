@@ -13,5 +13,51 @@
     </form>
 
     {{ chat_results }}
+
+    <main>
+      <h2>JavaScript で音声認識</h2>
+      <p>
+        音声データを Google
+        のサーバに送信してテキスト化されたものが返ってきます。
+      </p>
+      <button type="button" class="start">音声認識開始</button>
+      <button type="button" class="stop">終了</button>
+      <div class="output"></div>
+      <div class="response-container"></div>
+    </main>
+
+  <script>
+    const recognition = new webkitSpeechRecognition(); // prefix 必要 SpeechRecognition
+    recognition.lang = "ja";
+    recognition.continuous = true;
+    
+    recognition.onresult = ({ results }) => {
+      const output = document.querySelector(".output");
+      output.textContent = results[0][0].transcript;
+  
+      // Ajaxリクエストを作成してテキストを送信
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/process_text", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        const responseContainer = document.querySelector(".response-container");
+        const response = document.createElement("div"); // 応答を表示する新しい要素を作成
+        response.textContent = JSON.parse(xhr.responseText).message;
+        responseContainer.appendChild(response); // 応答を追加
+      }
+    };
+      xhr.send(JSON.stringify({ text: results[0][0].transcript }));
+    };
+  
+    const startButton = document.querySelector(".start");
+    startButton.addEventListener("click", () => {
+      recognition.start();
+    });
+    const stopButton = document.querySelector(".stop");
+    stopButton.addEventListener("click", () => {
+      recognition.stop();
+    });
+  </script>
 </body>
 </html>

@@ -153,4 +153,20 @@ def forAText():
   except sr.RequestError as e:
       print(f"Google Speech Recognitionサービスからの結果を要求できませんでした;{e}")
 
-forAText()
+def forAText_2():
+    #音声認識オブジェクト生成
+  r = sr.Recognizer()
+
+  #マイクから音声を取得
+  with sr.Microphone() as source:
+      print("何か話してください")
+      audio = r.listen(source)
+
+  try:
+      #音声をテキストに変換
+      user_input = r.recognize_google(audio, language='ja-JP')
+      print(f"あなた：{user_input}")
+  except sr.UnknownValueError:
+      print("Google Speech Recognitionは音声を理解できませんでした")
+  except sr.RequestError as e:
+      print(f"Google Speech Recognitionサービスからの結果を要求できませんでした;{e}")
