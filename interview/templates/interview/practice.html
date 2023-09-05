@@ -13,6 +13,10 @@
     </form>
 
     {{ chat_results }}
+    
+    <div class="response-container">
+      {{ request.session.processed_text }}
+    </div>
 
     <main>
       <h2>JavaScript で音声認識</h2>

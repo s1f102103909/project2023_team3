@@ -80,6 +80,10 @@ def process_text(request):
         # テキストの処理を実行
         # ...
         # 応答を返す
+
+        # 処理されたテキストをセッションに保存
+        request.session['processed_text'] = text
+        
         return JsonResponse({'message': text })
     else:
         return JsonResponse({'message': 'Invalid request method'})
