@@ -14,7 +14,7 @@
 
     {{ chat_results }}
     <br>
-    <h1>Camera Practice</h1>
+    <h1>あなた</h1>
     <div id="video-container">
         <video id="camera-feed" autoplay width="640" height="480"></video>
     </div>
@@ -29,6 +29,20 @@
             .catch(error => {
                 console.error('Error accessing camera:', error);
             });
+    </script>
+    <h4>後から消す</h4>
+    <video id="camera-stream" autoplay controls></video>
+    <script>
+        var cameraStream = document.getElementById('camera-stream');
+        function updateCameraStream() {
+            fetch('/get_frame/')
+                .then(response => response.blob())
+                .then(blob => {
+                    cameraStream.src = URL.createObjectURL(blob);
+                    setTimeout(updateCameraStream, 100);
+                });
+        }
+        updateCameraStream();
     </script>
 
     
