@@ -61,7 +61,10 @@ class CameraView(View):
 
             # 映像を保存
             cap.release()
-            out.release()
+            try:
+                out.release()
+            except Exception as e:
+                print("Error releasing VideoWriter:", e)
             cv2.destroyAllWindows()
 
         return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
