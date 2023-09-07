@@ -38,7 +38,7 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 
-def practice(request):
+def interview_recording(request):
     cap = cv2.VideoCapture(0)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -103,6 +103,6 @@ class CameraView(View):
         return response
 
 def display_video(request):
-    video_path = '/path/to/output.avi'  # output.avi の実際のパスに置き換えてください
+    video_path = 'output.mp4'  # output.avi の実際のパスに置き換えてください
     context = {'video_path': video_path}
     return render(request, 'video_display.html', context)

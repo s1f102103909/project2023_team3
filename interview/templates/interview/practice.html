@@ -6,6 +6,7 @@
     <title>Document</title>
 </head>
 <body>
+    <a href="{% url 'recording' %}">録画開始</a>
     <form method="POST">
         {% csrf_token %}
 
@@ -14,7 +15,7 @@
 
     {{ chat_results }}
     <br>
-    <h1>内蔵カメラ表示</h1>
+    <h4>your screen</h4>
     <div id="video-container">
         <video id="camera-feed" autoplay width="640" height="480"></video>
     </div>
