@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 import speech_recognition as sr
 from pydub import AudioSegment
 import io
+
+from .tests import Voicevox
 # Create your views here.
 
 def home(request):
@@ -62,4 +64,6 @@ def process_text(request):
         body_data = json.loads(body_unicode)
         text = body_data['text']
         response = generate_answer(text)
+        vv=Voicevox()
+        vv.speak(text=response)
         return JsonResponse({'message': response})
