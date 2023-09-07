@@ -15,21 +15,5 @@
 
     {{ chat_results }}
     <br>
-    <h4>your screen</h4>
-    <div id="video-container">
-        <video id="camera-feed" autoplay width="640" height="480"></video>
-    </div>
-    <script>
-        const video = document.getElementById('camera-feed');
-        const constraints = { video: true };
-
-        navigator.mediaDevices.getUserMedia(constraints)
-            .then(stream => {
-                video.srcObject = stream;
-            })
-            .catch(error => {
-                console.error('Error accessing camera:', error);
-            });
-    </script>
 </body>
 </html>
