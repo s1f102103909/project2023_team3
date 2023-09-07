@@ -8,15 +8,6 @@ import pyaudio
 import wave
 import numpy as np
 import time
-import audioop
-from gtts import gTTS
-import speech_recognition as sr
-import tempfile
-import pygame
-
-from playsound import playsound
-from io import BytesIO
-import whisper
 
 import requests, json
 import io
@@ -50,47 +41,6 @@ def text_to_speech(response):
     engine.setProperty("rate", 100)
     engine.say("{}".format(response))
     engine.runAndWait()
-
-def forAText():
-  openai.api_key = os.getenv('234beG84Ybh7BeumEJr6kfmjPSulkprNO9a_BRS89Ai922HJmqVkS7RYt29B3r_YtvnTcegVG7Jczx06iQ6cHzw')
-
-  #音声認識オブジェクト生成
-  r = sr.Recognizer()
-
-  #マイクから音声を取得
-  with sr.Microphone() as source:
-      print("何か話してください")
-      audio = r.listen(source)
-
-  try:
-      #音声をテキストに変換
-      user_input = r.recognize_google(audio, language='ja-JP')
-      print(f"あなた：{user_input}")
-
-      # openaiのAPIに連携
-      response = openai.Completion.create(
-          engine = "text-davinci-002",
-          prompt = user_input,
-          temperature = 0.5,
-          max_tokens = 100
-      )
-
-      ai_response = response.choices[0].text.strip()
-      print(f"AI: {ai_response}")
-
-      #テキストを音声に変換
-      tts = gTTS(text = ai_response, lang='ja')
-      with tempfile.NamedTemporaryFile(delete=True) as fp:
-          tts.save(f"{fp.name}.mp3")
-          pygame.mixer.init()
-          pygame.mixer.music.load(f"{fp.name}.mp3")
-          pygame.mixer.music.play()
-          while pygame.mixer.music.get_busy():
-              pygame.time.Clock().tick(10)
-  except sr.UnknownValueError:
-      print("Google Speech Recognitionは音声を理解できませんでした")
-  except sr.RequestError as e:
-      print(f"Google Speech Recognitionサービスからの結果を要求できませんでした;{e}")
 
 
 class Voicevox:
