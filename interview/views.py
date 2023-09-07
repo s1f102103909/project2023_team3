@@ -43,8 +43,8 @@ def interview_practice(request):
 class CameraView(View):
     async def generate_frames(self):
         cap = cv2.VideoCapture(0)  # 内部カメラにアクセスする場合、0を指定
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
+        fourcc = cv2.VideoWriter_fourcc('m', 'p', '4','v')
+        out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (640, 480))
         if not cap.isOpened():
             yield b'Cannot access camera'
         while True:
