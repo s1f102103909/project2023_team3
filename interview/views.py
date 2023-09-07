@@ -6,6 +6,7 @@ from .tests import generate_answer
 import cv2
 import os
 from django.views import View
+from django.conf import settings
 from django.http import StreamingHttpResponse
 
 # Create your views here.
@@ -44,8 +45,9 @@ class CameraView(View):
         def generate_frames():
             cap = cv2.VideoCapture(0)  # 内部カメラにアクセスする場合、0を指定
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            output_path = os.path.join(os.path.dirname(__file__), 'output.avi')
-            out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
+            media_root = settings.MEDIA_ROOT
+            output_path = os.path.join(media_root, 'output.avi')
+            out = cv2.VideoWriter(output_path, fourcc, 20.0, (640, 480))
 
             if not cap.isOpened():
                 yield b'Cannot access camera'
