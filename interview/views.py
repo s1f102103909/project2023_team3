@@ -47,7 +47,6 @@ def interview_recording(request):
     out = cv2.VideoWriter('output.mp4', fourcc, fps, (w, h))
     while True:
         ret, frame = cap.read()
-        cv2.imshow('frame', frame)
         out.write(frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
