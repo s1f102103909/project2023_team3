@@ -54,6 +54,7 @@ class CameraView(View):
 
             while True:
                 ret, frame = cap.read()
+                out.write(frame)
                 if not ret:
                     break
 
