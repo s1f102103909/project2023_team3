@@ -30,20 +30,7 @@
                 console.error('Error accessing camera:', error);
             });
     </script>
-    <h4>後から消す</h4>
-    <video id="camera-stream" autoplay controls></video>
-    <script>
-        var cameraStream = document.getElementById('camera-stream');
-        function updateCameraStream() {
-            fetch('/get_frame/')
-                .then(response => response.blob())
-                .then(blob => {
-                    cameraStream.src = URL.createObjectURL(blob);
-                    setTimeout(updateCameraStream, 100);
-                });
-        }
-        updateCameraStream();
-    </script>
+    
 
     
 
