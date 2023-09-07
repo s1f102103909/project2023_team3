@@ -47,6 +47,8 @@ class CameraView(View):
         out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (640, 480))
         if not cap.isOpened():
             yield b'Cannot access camera'
+        if not out.isOpened():
+            print("Error opening VideoWriter")
         while True:
             ret, frame = cap.read()
             out.write(frame)
