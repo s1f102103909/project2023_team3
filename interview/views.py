@@ -4,7 +4,6 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 import cv2
-import os
 import numpy as np
 from django.views import View
 from django.http import StreamingHttpResponse
@@ -37,8 +36,24 @@ def interview_practice(request):
         'form' : form, 
         'chat_results' : chat_results
     }
-    
     return HttpResponse(template.render(context, request))
+
+def practice(request):
+    cap = cv2.VideoCapture(0)
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+    out = cv2.VideoWriter('output.mp4', fourcc, fps, (w, h))
+    while True:
+        ret, frame = cap.read()
+        cv2.imshow('frame', frame)
+        out.write(frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
 
 class CameraView(View):
     async def generate_frames(self):
