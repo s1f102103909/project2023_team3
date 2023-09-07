@@ -53,6 +53,7 @@ def interview_recording(request):
     cap.release()
     out.release()
     cv2.destroyAllWindows()
+    return HttpResponse("Recording completed")
 
 class CameraView(View):
     async def generate_frames(self):
