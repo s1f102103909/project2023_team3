@@ -61,9 +61,24 @@ class CameraView(View):
                 if ret:
                     yield (b'--frame\r\n'
                            b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            
+            while(cap.isOpened()):
+                # Bool値とキャプチャ画像を変数に格納
+                ret, frame = cap.read()
+                if ret==True:
+                    # リサイズを行う
+                    frame = cv2.resize(frame, (640,480))
+                    # フレームの書き込み（保存）
+                    out.write(frame)
+                    # 録画中の映像（画像）を表示
+                    cv2.imshow('recoding', frame)
+                    # qが押されたら録画を終了
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
+                else:
+                    break
 
             # 映像を保存
-            out.write(frame)
             cap.release()
             try:
                 out.release()
