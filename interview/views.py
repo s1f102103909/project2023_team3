@@ -56,6 +56,8 @@ class CameraView(View):
             if ret:
                 yield (b'--frame\r\n'
                         b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+               break
         while(cap.isOpened()):
             # Bool値とキャプチャ画像を変数に格納
             ret, frame = cap.read()
