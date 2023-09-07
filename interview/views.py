@@ -46,8 +46,7 @@ class CameraView(View):
             cap = cv2.VideoCapture(0)  # 内部カメラにアクセスする場合、0を指定
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
             media_root = settings.MEDIA_ROOT
-            output_path = os.path.join(media_root, 'output.avi')
-            out = cv2.VideoWriter(output_path, fourcc, 20.0, (640, 480))
+            out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
 
             if not cap.isOpened():
                 yield b'Cannot access camera'
@@ -64,6 +63,7 @@ class CameraView(View):
                            b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
 
             # 映像を保存
+            out.write(frame)
             cap.release()
             try:
                 out.release()
