@@ -4,6 +4,7 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 from .tests import text_to_speech
+from .models import UserInformation
 
 # Create your views here.
 
@@ -36,5 +37,13 @@ def interview_practice(request):
         'chat_results' : chat_results
     }
     return HttpResponse(template.render(context, request))
+
+def score(request):
+    user = UserInformation.objects.get(Name=request.user.id)
+    context = {
+        "max_score" : user.Shushoku_maxScore,
+        "previous_score" : user.Shushoku_previousScore
+    }
+    return render(request, 'interview/score.html', context) 
 
 
