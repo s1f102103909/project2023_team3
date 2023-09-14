@@ -4,9 +4,6 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 import cv2
-import numpy as np
-from django.views import View
-from django.http import StreamingHttpResponse
 
 # Create your views here.
 
