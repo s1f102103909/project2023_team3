@@ -6,7 +6,64 @@
     <title>Document</title>
 </head>
 <body>
-    <a href="{% url 'recording' %}" target="_blank">録画開始</a>
+    <video id="videoElement" autoplay></video>
+    <button id="startButton">録画開始</button>
+    <button id="stopButton">録画停止</button>
+
+    <script>
+        // カメラとマイクへのアクセス許可を取得
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(function (stream) {
+                const videoElement = document.getElementById('videoElement');
+                videoElement.srcObject = stream;
+
+                const startButton = document.getElementById('startButton');
+                const stopButton = document.getElementById('stopButton');
+                let mediaRecorder;
+                let chunks = [];
+
+                startButton.addEventListener('click', () => {
+                    mediaRecorder = new MediaRecorder(stream);
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            chunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'video/mp4' });
+                        const formData = new FormData();
+                        formData.append('video', blob, 'output.mp4');
+
+                        // フォームデータをサーバーに送信
+                        fetch('/capture_and_save/', {
+                            method: 'POST',
+                            body: formData
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data.message);
+                            })
+                            .catch(error => {
+                                console.error('エラー:', error);
+                            });
+                    };
+
+                    mediaRecorder.start();
+                });
+
+                stopButton.addEventListener('click', () => {
+                    if (mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                        stream.getTracks().forEach(track => track.stop());
+                    }
+                });
+            })
+            .catch(function (error) {
+                console.error('カメラまたはマイクのアクセス許可が拒否されました: ', error);
+            });
+    </script>
     <form method="POST">
         {% csrf_token %}
 
@@ -14,6 +71,5 @@
     </form>
 
     {{ chat_results }}
-    <br>
 </body>
 </html>
