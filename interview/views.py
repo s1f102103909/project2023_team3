@@ -4,6 +4,7 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 import cv2
+from django.http import JsonResponse
 
 # Create your views here.
 
@@ -35,38 +36,19 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 
-def interview_recording(request):
+def capture_and_save(request):
+    # カメラからビデオをキャプチャ
     cap = cv2.VideoCapture(0)
-
-    if not cap.isOpened():
-        return HttpResponse("Failed to open the camera.")
-
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter('output.mp4', fourcc, fps, (w, h))
+    out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (640, 480))
 
     while True:
         ret, frame = cap.read()
-
         if not ret:
             break
-
-        cv2.imshow('camera', frame)
         out.write(frame)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
 
     cap.release()
     out.release()
-    cv2.destroyAllWindows()
-    return HttpResponse("Recording completed")
 
-
-
-def display_video(request):
-    video_path = 'output.mp4'  # output.avi の実際のパスに置き換えてください
-    context = {'video_path': video_path}
-    return render(request, 'video_display.html', context)
+    return JsonResponse({'message': 'ビデオが保存されました。'})
