@@ -29,12 +29,20 @@
     const recognition = new webkitSpeechRecognition(); // prefix 必要 SpeechRecognition
     recognition.lang = "ja";
     recognition.continuous = true;
+    let timeoutId;
     
     recognition.onresult = ({ results }) => {
       // CSRF Tokenを取得
       var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+      clearTimeout(timeoutId);
+
       const output = document.querySelector(".output");
+
+      timeoutId = setTimeout(() => {
+        recognition.stop();
+      },5000);
+
       output.textContent = results[0][0].transcript;
   
       // Ajaxリクエストを作成してテキストを送信
@@ -59,9 +67,13 @@
     const startButton = document.querySelector(".start");
     startButton.addEventListener("click", () => {
       recognition.start();
+      timeoutId = setTimeout(() => {
+        recognition.stop();
+      },5000);
     });
     const stopButton = document.querySelector(".stop");
     stopButton.addEventListener("click", () => {
+      clearTimeout(timeoutId);
       recognition.stop();
     });
   </script>
