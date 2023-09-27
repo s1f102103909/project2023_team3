@@ -8,62 +8,83 @@
 <body>
   {% csrf_token %}
   <form method="POST">
-
     <button type="submit">練習開始</button>
   </form>
-
-    {{ chat_results }}
+  {{ chat_results }}
   <main>
-    <h2>JavaScript で音声認識</h2>
-    <p>
-      音声データを Google
-      のサーバに送信してテキスト化されたものが返ってきます。
-    </p>
-    <button type="button" class="start">音声認識開始</button>
-    <button type="button" class="stop">終了</button>
+
     <div class="output"></div>
     <div class="response-container"></div>
   </main>
-
   <script>
-    const recognition = new webkitSpeechRecognition(); // prefix 必要 SpeechRecognition
+    const recognition = new webkitSpeechRecognition();
     recognition.lang = "ja";
+    recognition.interimResults = true;
     recognition.continuous = true;
-    
-    recognition.onresult = ({ results }) => {
-      // CSRF Tokenを取得
-      var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let isListening = false;
+    let timeoutId; // 5秒のタイムアウト用のタイマーID
 
-      const output = document.querySelector(".output");
-      output.textContent = results[0][0].transcript;
-  
-      // Ajaxリクエストを作成してテキストを送信
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "/process_text/", true);
-      xhr.setRequestHeader("Content-Type", "application/json");
-
-      // リクエストヘッダにCSRFトークンを設定
-      xhr.setRequestHeader("X-CSRFToken", csrftoken);
-
-      xhr.onreadystatechange = function () {
-      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-        const responseContainer = document.querySelector(".response-container");
-        const response = document.createElement("div"); // 応答を表示する新しい要素を作成
-        response.textContent = JSON.parse(xhr.responseText).message;
-        responseContainer.appendChild(response); // 応答を追加
+    recognition.onresult = (event) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          clearTimeout(timeoutId); // 音声が検出されたらタイムアウトタイマーをクリア
+          let transcript = event.results[i][0].transcript;
+          const output = document.querySelector(".output");
+          output.textContent = transcript;
+        }
       }
     };
-      xhr.send(JSON.stringify({ text: output.textContent }));
+
+    const startRecognition = () => {
+      if (!isListening) {
+        recognition.start();
+        isListening = true;
+      }
     };
-  
-    const startButton = document.querySelector(".start");
-    startButton.addEventListener("click", () => {
-      recognition.start();
-    });
-    const stopButton = document.querySelector(".stop");
-    stopButton.addEventListener("click", () => {
-      recognition.stop();
-    });
+
+    const stopRecognition = () => {
+      if (isListening) {
+        recognition.stop();
+        isListening = false;
+      }
+    };
+
+    const sendText = (transcript) => {
+      // CSRF Tokenを取得
+      let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      // Ajaxリクエストを作成してテキストを送信
+      let xhr = new XMLHttpRequest();
+      xhr.open("POST", "/process_text/", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      // リクエストヘッダにCSRFトークンを設定
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          const responseContainer = document.querySelector(".response-container");
+          const response = document.createElement("div");
+          response.textContent = JSON.parse(xhr.responseText).message;
+          responseContainer.appendChild(response);
+
+          // テキスト送信が完了したら音声認識を再開
+          startRecognition();
+        }
+      };
+      xhr.send(JSON.stringify({ text: transcript }));
+    };
+
+    recognition.onend = () => {
+      // 5秒後にテキスト送信を開始
+      timeoutId = setTimeout(() => {
+        const transcript = document.querySelector(".output").textContent;
+        sendText(transcript);
+        stopRecognition(); // テキスト送信中に音声認識を停止
+      }, 5000);
+    };
+
+    // 音声認識の開始
+    startRecognition();
+
   </script>
 </body>
 </html>

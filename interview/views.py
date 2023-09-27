@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
-from .tests import text_to_speech
+from .tests import speech_active
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -16,7 +16,7 @@ from .tests import Voicevox
 
 def home(request):
     return render(request, 'interview/home.html', {}) 
-
+@csrf_exempt
 def interview_practice(request):
     chat_results = ""
     if request.method == "POST":
@@ -32,7 +32,6 @@ def interview_practice(request):
                  """
         response = generate_answer(prompt)
         res = response.replace('面接官:', '')
-        text_to_speech(res)
         chat_results = response
 
             
@@ -45,6 +44,9 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 import json
+
+def check_speech_end(request):
+    return JsonResponse({'active':recognition.is_listening()})
 
 @csrf_exempt
 def process_text(request):
@@ -64,6 +66,5 @@ def process_text(request):
         body_data = json.loads(body_unicode)
         text = body_data['text']
         response = generate_answer(text)
-        vv=Voicevox()
-        vv.speak(text=response)
+
         return JsonResponse({'message': response})

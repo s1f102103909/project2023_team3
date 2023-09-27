@@ -17,11 +17,16 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS']='glossy-aloe-396205-d7fdd774bdbe.js
 API_KEY = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
 
+speech_active = False
+
 def generate_answer(prompt):
     openai.api_key = API_KEY
     openai.api_base = API_BASE
     openai.Model.list() #OpenAIのインスタンスを生成
     
+    global speech_active
+    speech_active = True
+
     response = openai.ChatCompletion.create(
         model = "gpt-3.5-turbo",
         messages = [
@@ -34,6 +39,8 @@ def generate_answer(prompt):
         presence_penalty=0
     )
     answer = response['choices'][0]['message']['content']
+    vv=Voicevox()
+    vv.speak(text=answer)
     return answer
 
 def text_to_speech(response):
@@ -48,7 +55,7 @@ class Voicevox:
         self.host = host
         self.port = port
 
-    def speak(self,text=None,speaker=47): # VOICEVOX:ナースロボ＿タイプＴ
+    def speak(self,text=None,speaker=13): # VOICEVOX:ナースロボ＿タイプＴ
 
         params = (
             ("text", text),
