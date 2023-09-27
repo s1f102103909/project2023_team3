@@ -4,6 +4,10 @@
 
     {% if user.is_authenticated %}
     <p>Hi {{ user.username }}!</p>
+    <a href="{% url 'practice' %}">面接練習</a>
+    <br>
+    <a href="{% url 'score'%}" >スコア確認</a>
+    <br>
     <a href="{% url 'logout' %}">logout</a>
     {% else %}
     <p>You are not logged in.</p>

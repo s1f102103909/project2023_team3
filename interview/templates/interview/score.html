@@ -1,0 +1,14 @@
+{% load static %}
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>score</title>
+  </head>
+  <body>
+    <p>{{ user.username }}さんのスコアです。</p>
+    
+    <p>最高スコア : {{ max_score }}</p>
+    
+    <p>前回のスコア : {{ previous_score}}</p>
+  </body>
+</html>

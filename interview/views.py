@@ -8,6 +8,13 @@ import audioop
 import gtts
 from playsound import playsound
 from io import BytesIO
+from django.http import HttpResponse
+from .forms import ChatForm
+from django.template import loader
+from .tests import generate_answer
+from .tests import text_to_speech
+from .models import UserInformation
+
 
 #api key
 openai.api_key = '234beG84Ybh7BeumEJr6kfmjPSulkprNO9a_BRS89Ai922HJmqVkS7RYt29B3r_YtvnTcegVG7Jczx06iQ6cHzw'
@@ -19,76 +26,38 @@ SoundFile_Path = "/soundfile/file.wav"
 def home(request):
     return render(request, 'interview/home.html', {}) 
 
+def interview_practice(request):
+    chat_results = ""
+    if request.method == "POST":
+        # ChatGPTボタン押下時
+        form = ChatForm(request.POST)
+        #if form.is_valid():
+        #prompt = form.cleaned_data['prompt']
+        prompt = """
+                今から面接を始めます。あなたは面接官で、私が受験者です。以下の条件に従って、面接を行なってください。
+                ・IT企業の入社面接を想定しください。
+                ・質問を1つずつしてください
+                ・私の回答に1つ1つに、採点を行なってください。
+                 """
+        response = generate_answer(prompt)
+        res = response.replace('面接官:', '')
+        text_to_speech(res)
+        chat_results = response
+            
+    else:
+        form = ChatForm()
+    template = loader.get_template('interview/practice.html')
+    context = {
+        'form' : form, 
+        'chat_results' : chat_results
+    }
+    return HttpResponse(template.render(context, request))
 
-def start():
-    # ボタンを押すなどのイベントがない場合は一定時間後に自動で録音を開始
-    N = 5  # 無音検出時間（秒）
-    THRESHOLD = 2000  # 音量のしきい値
+def score(request):
+    user = UserInformation.objects.get(Name=request.user.id)
+    context = {
+        "max_score" : user.Shushoku_maxScore,
+        "previous_score" : user.Shushoku_previousScore
+    }
+    return render(request, 'interview/score.html', context) 
 
-    # 音声録音関係のパラメータ
-    FORMAT = pyaudio.paInt16
-    CHANNELS = 1
-    RATE = 44100
-    CHUNK = 2**11
-    RECORD_SECONDS = 5
-    WAVE_OUTPUT_FILENAME = "file.wav"
-
-    iAudio = pyaudio.PyAudio()
-
-    # 録音開始
-    stream = iAudio.open(format=FORMAT, channels=CHANNELS,
-                    rate=RATE, input=True,
-                    frames_per_buffer=CHUNK)
-
-    frames = []
-
-    for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-        data = stream.read(CHUNK)
-        frames.append(data)
-        rms = audioop.rms(data, 2)  # 音量の取得
-        if rms < THRESHOLD:  # 音量がしきい値を下回ったらカウント開始
-            time.sleep(N)
-            rms = audioop.rms(stream.read(CHUNK), 2)
-            if rms < THRESHOLD:  # N秒後もしきい値を下回っていたら録音終了
-                break
-
-    # 録音終了
-    stream.stop_stream()
-    stream.close()
-    iAudio.terminate()
-
-    waveFile = wave.open(SoundFile_Path, 'wb')
-    waveFile.setnchannels(CHANNELS)
-    waveFile.setsampwidth(iAudio.get_sample_size(FORMAT))
-    waveFile.setframerate(RATE)
-    waveFile.writeframes(b''.join(frames))
-    waveFile.close()
-
-def speech_to_text(filepath):
-
-    # ファイルを開く
-    audio_file= open(filepath, "rb")
-
-    # Speech to Text変換
-    response = openai.Audio.transcribe(model = "whisper-1", # Speech-to-Textモデル
-                                       file  = audio_file,  # オーディオファイル
-                                      )
-    
-    # 変換後のテキスト出力
-    return response.text
-
-
-def text_to_speech():
-    # file を保存してから音声を流す
-
-    # text入力 -> tts(音声ファイル)
-    tts = gtts.gTTS("hello world",lang="en") # Janpanese : ja;
-    # 音声ファイル保存
-    tts.save("/soundfile/hello.mp3")
-    # play
-    playsound("/soundfile/hello.mp3")
-
-    # 音声を直接流す
-    mp3_fp = BytesIO()
-    tts = gtts.gTTS("hello world",lang="en")
-    tts.write_to_fp(mp3_fp)
