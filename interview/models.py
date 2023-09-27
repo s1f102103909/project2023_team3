@@ -5,9 +5,9 @@ from django.db.models.signals import post_save
 # Create your models here.
 
 class UserInformation(models.Model):
-    name = models.OneToOneField(User, on_delete=models.CASCADE)
-    shushoku_previousScore = models.IntegerField(blank=True)
-    shushoku_maxScore = models.IntegerField(blank=True)
+    Name = models.OneToOneField(User, on_delete=models.CASCADE)
+    Shushoku_previousScore = models.IntegerField(blank=True)
+    Shushoku_maxScore = models.IntegerField(blank=True)
     
 
     def __str__(self):
@@ -15,9 +15,9 @@ class UserInformation(models.Model):
 
 def user_created(sender, instance, created, **kwargs):
     if created:
-        user_obj = UserInformation(name = instance)
-        user_obj.shushoku_previousScore = 0
-        user_obj.shushoku_maxScore = 0
+        user_obj = UserInformation(Name = instance)
+        user_obj.Shushoku_previousScore = 0
+        user_obj.Shushoku_maxScore = 0
         user_obj.save()
 
 post_save.connect(user_created, sender=User)
