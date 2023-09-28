@@ -62,7 +62,9 @@ def interview_recording(request):
     cap.release()
     out.release()
     cv2.destroyAllWindows()
-    return HttpResponse("Recording completed")
+
+    # Recording completed, now render the template
+    return render(request, 'interview/practice.html')
 
 
 
