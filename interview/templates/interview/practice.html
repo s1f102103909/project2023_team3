@@ -8,7 +8,7 @@
 <body>
   <form method="POST">
     {% csrf_token %}
-    <button type="submit" class="start">練習開始</button>
+    <button type="submit" class="practice">練習開始</button>
   </form>
   {{ chat_results }}
   <main>
@@ -53,33 +53,34 @@
     };
 
     const stopRecognitionButton = () => {
-      recognition.stop();
+      stopRecognition();
       recognitionButton = false;
-    }
-    const sendText = (transcript) => {
-      if(recognitionButton){
-      // CSRF Tokenを取得
-      let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    };
 
-      // Ajaxリクエストを作成してテキストを送信
-      let xhr = new XMLHttpRequest();
-      xhr.open("POST", "/process_text/", true);
-      xhr.setRequestHeader("Content-Type", "application/json");
-      // リクエストヘッダにCSRFトークンを設定
-      xhr.setRequestHeader("X-CSRFToken", csrftoken);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-          const responseContainer = document.querySelector(".response-container");
-          const response = document.createElement("div");
-          response.textContent = JSON.parse(xhr.responseText).message;
-          responseContainer.appendChild(response);
-          
-          // テキスト送信が完了したら音声認識を再開
-          startRecognition();
-        }
-      };
-      xhr.send(JSON.stringify({ text: transcript }));
-    }
+    const sendText = (transcript) => {
+      if (recognitionButton) {
+        // CSRF Tokenを取得
+        let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Ajaxリクエストを作成してテキストを送信
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "/process_text/", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        // リクエストヘッダにCSRFトークンを設定
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+            const responseContainer = document.querySelector(".response-container");
+            const response = document.createElement("div");
+            response.textContent = JSON.parse(xhr.responseText).message;
+            responseContainer.appendChild(response);
+
+            // テキスト送信が完了したら音声認識を再開
+            startRecognition();
+          }
+        };
+        xhr.send(JSON.stringify({ text: transcript }));
+      }
     };
 
     recognition.onend = () => {
