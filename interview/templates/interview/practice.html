@@ -6,13 +6,13 @@
     <title>Document</title>
 </head>
 <body>
-  {% csrf_token %}
+  <main>
   <form method="POST">
-    <button type="submit">練習開始</button>
+    {% csrf_token %}
+    <button type="submit" class="start">練習開始</button>
+    <button type="button" class="stop">終了</button>
   </form>
   {{ chat_results }}
-  <main>
-
     <div class="output"></div>
     <div class="response-container"></div>
   </main>
@@ -22,12 +22,13 @@
     recognition.interimResults = true;
     recognition.continuous = true;
     let isListening = false;
-    let timeoutId; // 5秒のタイムアウト用のタイマーID
+    let timeoutIdRecognition; // 2秒のタイムアウト用のタイマーID
+    let timeoutIdTextSend; // テキスト送信のタイムアウト用のタイマーID
 
     recognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
-          clearTimeout(timeoutId); // 音声が検出されたらタイムアウトタイマーをクリア
+          clearTimeout(timeoutIdRecognition); // 音声が検出されたらタイムアウトタイマーをクリア
           let transcript = event.results[i][0].transcript;
           const output = document.querySelector(".output");
           output.textContent = transcript;
@@ -65,7 +66,7 @@
           const response = document.createElement("div");
           response.textContent = JSON.parse(xhr.responseText).message;
           responseContainer.appendChild(response);
-
+          
           // テキスト送信が完了したら音声認識を再開
           startRecognition();
         }
@@ -74,16 +75,19 @@
     };
 
     recognition.onend = () => {
-      // 5秒後にテキスト送信を開始
-      timeoutId = setTimeout(() => {
+      // 2秒間音声が検出されない場合、音声認識を停止してテキスト送信を開始
+      timeoutIdRecognition = setTimeout(() => {
+        stopRecognition();
         const transcript = document.querySelector(".output").textContent;
         sendText(transcript);
-        stopRecognition(); // テキスト送信中に音声認識を停止
-      }, 5000);
+      }, 2000);
     };
 
-    // 音声認識の開始
-    startRecognition();
+    // "練習開始"ボタンをクリックしたときに音声認識を開始
+    const startButton = document.querySelector(".start");
+    startButton.addEventListener("click", () => {
+      setTimeout(function() {startRecognition();}, 23000);
+    });
 
   </script>
 </body>
