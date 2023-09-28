@@ -6,16 +6,13 @@
     <title>qで録画終了</title>
 </head>
 <body>
-   <p>abc</p>
-   <script>
-    // ページ読み込み時にメッセージを表示
-    window.onload = function() {
-        // メッセージを表示するためのダイアログ
-        var message = "録画が終了しました。"; // ここに表示したいメッセージを設定
-
-        // ブラウザの標準のアラートダイアログを使用
-        alert(message);
-    };
-</script>
+    <p>録画中...</p>
+    <script>
+        // ページが読み込まれたらテキストを表示する
+        window.onload = function() {
+            var messageElement = document.getElementById('message');
+            messageElement.style.display = 'block'; // テキストを表示
+        };
+    </script>
 </body>
 </html>
