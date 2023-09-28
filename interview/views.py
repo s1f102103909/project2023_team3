@@ -12,10 +12,15 @@ from pydub import AudioSegment
 import io
 
 from .tests import Voicevox
+import json
 # Create your views here.
 
 def home(request):
     return render(request, 'interview/home.html', {}) 
+
+def practice(request):
+    return render(request, 'interview/practice.html')
+
 @csrf_exempt
 def interview_practice(request):
     chat_results = ""
@@ -42,8 +47,7 @@ def interview_practice(request):
         'form' : form, 
         'chat_results' : chat_results
     }
-    return HttpResponse(template.render(context, request))
-import json
+    return JsonResponse({'message':response})
 
 def check_speech_end(request):
     return JsonResponse({'active':recognition.is_listening()})

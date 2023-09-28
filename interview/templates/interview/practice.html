@@ -7,12 +7,11 @@
 </head>
 <body>
   <main>
-  <form method="POST">
+
     {% csrf_token %}
-    <button type="submit" class="start">練習開始</button>
+
+    <button type="button" class="start">練習開始</button>
     <button type="button" class="stop">終了</button>
-  </form>
-  {{ chat_results }}
     <div class="output"></div>
     <div class="response-container"></div>
   </main>
@@ -24,6 +23,7 @@
     let isListening = false;
     let timeoutIdRecognition; // 2秒のタイムアウト用のタイマーID
     let timeoutIdTextSend; // テキスト送信のタイムアウト用のタイマーID
+    let recognitionButton = true;
 
     recognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -49,8 +49,13 @@
         isListening = false;
       }
     };
+    const stopButtonRecognition =() => {
+      recognition.stop();
+      recognitionButton = false;
+    }
 
     const sendText = (transcript) => {
+      if (recognitionButton){
       // CSRF Tokenを取得
       let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -72,6 +77,7 @@
         }
       };
       xhr.send(JSON.stringify({ text: transcript }));
+      }
     };
 
     recognition.onend = () => {
@@ -84,9 +90,52 @@
     };
 
     // "練習開始"ボタンをクリックしたときに音声認識を開始
+    //const startButton = document.querySelector(".start");
+    //startButton.addEventListener("click", () => {
+    //  setTimeout(function() {startRecognition();}, 23000);
+    //});
+
+    function callInterviewPractice(transcript) {
+      if(recognitionButton){
+      let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/practice1/', true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      // リクエストヘッダにCSRFトークンを設定
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          const responseContainer = document.querySelector(".response-container");
+          const response = document.createElement("div");
+          response.textContent = JSON.parse(xhr.responseText).message;
+          responseContainer.appendChild(response);
+          
+            // テキスト送信が完了したら音声認識を再開
+            startRecognition();
+            // ここで必要な処理を行う
+          }
+        };
+      // リクエストデータを送信（必要に応じてデータを設定）
+      xhr.send(JSON.stringify({ text: transcript }));
+      }
+    };
+
+    // 適切なタイミングで callInterviewPractice() を呼び出す
+    // 例: ボタンをクリックしたときに呼び出す
+    //document.getElementById('call-interview-button').addEventListener('click', function () {
+    //  callInterviewPractice();
+    //});
+
     const startButton = document.querySelector(".start");
     startButton.addEventListener("click", () => {
+      callInterviewPractice();
       setTimeout(function() {startRecognition();}, 23000);
+    });
+    const stopButton = document.querySelector(".stop");
+    stopButton.addEventListener("click", () => {
+      stopButtonRecognition();
     });
 
   </script>
