@@ -7,5 +7,13 @@
 </head>
 <body>
    <p>abc</p>
+   <script>
+    // ウィンドウがロードされたときに前のページに自動で戻る
+    window.onload = function() {
+        setTimeout(function() {
+            window.history.back();
+        }, 5000); // 5秒後に戻る例
+    };
+</script>
 </body>
 </html>
