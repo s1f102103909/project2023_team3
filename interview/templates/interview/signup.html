@@ -1,0 +1,14 @@
+{% load static %}
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>signup</title>
+  </head>
+  <body>
+    <h1>サインアップ</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">ユーザー登録</button>
+    </form>
+</html>

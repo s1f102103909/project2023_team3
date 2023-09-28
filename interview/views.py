@@ -1,4 +1,3 @@
-from django.shortcuts import render
 import openai
 import pyaudio
 import wave
@@ -8,12 +7,15 @@ import audioop
 import gtts
 from playsound import playsound
 from io import BytesIO
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 from .tests import text_to_speech
 from .models import UserInformation
+from django.contrib.auth.decorators import login_required
+from .forms import SignUpForm
 
 
 #api key
@@ -60,4 +62,14 @@ def score(request):
         "previous_score" : user.Shushoku_previousScore
     }
     return render(request, 'interview/score.html', context) 
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = SignUpForm()
+    return render(request, "interview/signup.html", {"form":form})
 
