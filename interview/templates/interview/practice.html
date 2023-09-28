@@ -6,13 +6,14 @@
     <title>Document</title>
 </head>
 <body>
-  <main>
   <form method="POST">
     {% csrf_token %}
     <button type="submit" class="start">練習開始</button>
-    <button type="button" class="stop">終了</button>
   </form>
   {{ chat_results }}
+  <main>
+    <button type="button" class="start">回答開始</button>
+    <button type="button" class="stop">終了</button>
     <div class="output"></div>
     <div class="response-container"></div>
   </main>
@@ -24,6 +25,7 @@
     let isListening = false;
     let timeoutIdRecognition; // 2秒のタイムアウト用のタイマーID
     let timeoutIdTextSend; // テキスト送信のタイムアウト用のタイマーID
+    let recognitionButton = true;
 
     recognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -50,7 +52,12 @@
       }
     };
 
+    const stopRecognitionButton = () => {
+      recognition.stop();
+      recognitionButton = false;
+    }
     const sendText = (transcript) => {
+      if(recognitionButton){
       // CSRF Tokenを取得
       let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -72,6 +79,7 @@
         }
       };
       xhr.send(JSON.stringify({ text: transcript }));
+    }
     };
 
     recognition.onend = () => {
@@ -86,7 +94,12 @@
     // "練習開始"ボタンをクリックしたときに音声認識を開始
     const startButton = document.querySelector(".start");
     startButton.addEventListener("click", () => {
-      setTimeout(function() {startRecognition();}, 23000);
+      startRecognition();
+    });
+
+    const stopButton = document.querySelector(".stop");
+    stopButton.addEventListener("click", () => {
+      stopRecognitionButton();
     });
 
   </script>
