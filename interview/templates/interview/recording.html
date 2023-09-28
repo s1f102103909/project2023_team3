@@ -8,11 +8,13 @@
 <body>
    <p>abc</p>
    <script>
-    // ウィンドウがロードされたときに前のページに自動で戻る
+    // ページ読み込み時にメッセージを表示
     window.onload = function() {
-        setTimeout(function() {
-            window.history.back();
-        }, 5000); // 5秒後に戻る例
+        // メッセージを表示するためのダイアログ
+        var message = "録画が終了しました。"; // ここに表示したいメッセージを設定
+
+        // ブラウザの標準のアラートダイアログを使用
+        alert(message);
     };
 </script>
 </body>

@@ -62,13 +62,11 @@ def interview_recording(request):
     cap.release()
     out.release()
     cv2.destroyAllWindows()
-
-    # Recording completed, now render the template
-    return render(request, 'interview/practice.html')
+    return HttpResponse("録画を保存しました")
 
 
 
 def display_video(request):
-    video_path = 'output.mp4'  # output.avi の実際のパスに置き換えてください
+    video_path = 'project2023_team3/output.mp4'  # output.avi の実際のパスに置き換えてください
     context = {'video_path': video_path}
     return render(request, 'video_display.html', context)
