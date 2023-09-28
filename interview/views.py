@@ -1,10 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 from .tests import text_to_speech
 from .models import UserInformation
+from django.contrib.auth.decorators import login_required
+from .forms import SignUpForm
 
 # Create your views here.
 
@@ -46,4 +48,12 @@ def score(request):
     }
     return render(request, 'interview/score.html', context) 
 
-
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = SignUpForm()
+    return render(request, "interview/signup.html", {"form":form})
