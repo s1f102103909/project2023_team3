@@ -37,7 +37,7 @@ def interview_practice(request):
                  """
         response = generate_answer(prompt)
         res = response.replace('面接官:', '')
-        chat_results = response
+        chat_results = res
 
             
     else:
@@ -47,7 +47,7 @@ def interview_practice(request):
         'form' : form, 
         'chat_results' : chat_results
     }
-    return JsonResponse({'message':response})
+    return JsonResponse({'message':chat_results})
 
 def check_speech_end(request):
     return JsonResponse({'active':recognition.is_listening()})

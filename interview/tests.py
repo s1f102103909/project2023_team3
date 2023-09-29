@@ -38,7 +38,7 @@ def generate_answer(prompt):
         frequency_penalty=0,
         presence_penalty=0
     )
-    answer = response['choices'][0]['message']['content']
+    answer = response['choices'][0]['message']['content'].replace('面接官:', '')
     vv=Voicevox()
     vv.speak(text=answer)
     return answer
