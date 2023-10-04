@@ -8,7 +8,6 @@ import pyaudio
 import wave
 import numpy as np
 import time
-
 import requests, json
 import io
 
