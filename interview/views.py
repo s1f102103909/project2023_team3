@@ -4,6 +4,8 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 import cv2
+import datetime
+import time
 
 # Create your views here.
 
@@ -36,6 +38,9 @@ def interview_practice(request):
     return HttpResponse(template.render(context, request))
 
 def interview_recording(request):
+    current_datetime = datetime.datetime.now()
+    formatted_datetime = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+    output_filename = f"output{formatted_datetime}.mp4"
     cap = cv2.VideoCapture(0)
 
     if not cap.isOpened():
@@ -45,8 +50,8 @@ def interview_recording(request):
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter('output.mp4', fourcc, fps, (w, h))
-
+    out = cv2.VideoWriter(output_filename, fourcc, fps, (w, h))
+    start_time = time.time()
     while True:
         ret, frame = cap.read()
 
@@ -56,7 +61,11 @@ def interview_recording(request):
         cv2.imshow('camera', frame)
         out.write(frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q') or key == ord(' '):
+            break
+        current_time = time.time()
+        if cv2.waitKey(1) & 0xFF == ord('q') or (current_time - start_time) >= 60:
             break
 
     cap.release()
