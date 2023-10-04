@@ -12,22 +12,26 @@ from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
-from .tests import text_to_speech
 from .models import UserInformation
 from django.contrib.auth.decorators import login_required
 from .forms import SignUpForm
-
-
 #api key
 openai.api_key = '234beG84Ybh7BeumEJr6kfmjPSulkprNO9a_BRS89Ai922HJmqVkS7RYt29B3r_YtvnTcegVG7Jczx06iQ6cHzw'
 openai.api_base = 'https://api,openai.iniad.org/api/v1'
-
 SoundFile_Path = "/soundfile/file.wav"
+from .tests import speech_active
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import speech_recognition as sr
+from pydub import AudioSegment
+import io
+from .tests import Voicevox
+
 # Create your views here.
 
 def home(request):
     return render(request, 'interview/home.html', {}) 
-
+@csrf_exempt
 def interview_practice(request):
     chat_results = ""
     if request.method == "POST":
@@ -43,8 +47,8 @@ def interview_practice(request):
                  """
         response = generate_answer(prompt)
         res = response.replace('面接官:', '')
-        text_to_speech(res)
-        chat_results = response
+        chat_results = res
+
             
     else:
         form = ChatForm()
@@ -54,6 +58,8 @@ def interview_practice(request):
         'chat_results' : chat_results
     }
     return HttpResponse(template.render(context, request))
+import json
+
 
 def score(request):
     user = UserInformation.objects.get(Name=request.user.id)
@@ -73,3 +79,26 @@ def signup(request):
         form = SignUpForm()
     return render(request, "interview/signup.html", {"form":form})
 
+def check_speech_end(request):
+    return JsonResponse({'active':recognition.is_listening()})
+
+@csrf_exempt
+def process_text(request):
+    if request.method == 'POST':
+        #text = request.POST.get('text')
+        # テキストの処理を実行
+        # ...
+        # 応答を返す
+
+        # 処理されたテキストをセッションに保存
+        #request.session['processed_text'] = text
+        
+        #return JsonResponse({'message': text })
+    #else:
+        #return JsonResponse({'message': 'Invalid request method'})
+        body_unicode = request.body.decode('utf-8')
+        body_data = json.loads(body_unicode)
+        text = body_data['text']
+        response = generate_answer(text)
+
+        return JsonResponse({'message': response})
