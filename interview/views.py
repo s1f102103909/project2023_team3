@@ -32,7 +32,7 @@ def interview_practice(request):
                  """
         response = generate_answer(prompt)
         res = response.replace('面接官:', '')
-        chat_results = response
+        chat_results = res
 
             
     else:
