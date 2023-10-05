@@ -30,6 +30,7 @@ def generate_answer(prompt):
     return answer
 
 # ビデオキャプチャの取得
-cap = cv2.VideoCapture(0)
+#cap = cv2.VideoCapture(0)
 #コーデック(fourcc)の設定
-fourcc = cv2.VideoWriter_fourcc(*"XVID") 
+#fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+#out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (64, 48))
