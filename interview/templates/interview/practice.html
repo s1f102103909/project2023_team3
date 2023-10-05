@@ -11,7 +11,8 @@
     {% csrf_token %}
 
     <button type="button" class="start">練習開始</button>
-    <button type="button" class="stop">終了</button>
+    <button type="button" class="RecognitionStop">回答完了</button>
+    <button type="button" class="stop">練習終了</button>
     <div class="output"></div>
     <div class="response-container"></div>
   </main>
@@ -35,20 +36,21 @@
         }
       }
     };
-
+    //音声認識再開
     const startRecognition = () => {
       if (!isListening) {
         recognition.start();
         isListening = true;
       }
     };
-
+    //音声認識ストップ
     const stopRecognition = () => {
       if (isListening) {
         recognition.stop();
         isListening = false;
       }
     };
+    //練習終了用
     const stopButtonRecognition =() => {
       recognition.stop();
       recognitionButton = false;
@@ -127,16 +129,23 @@
     //document.getElementById('call-interview-button').addEventListener('click', function () {
     //  callInterviewPractice();
     //});
-
+    
+    //練習開始ボタン
     const startButton = document.querySelector(".start");
     startButton.addEventListener("click", () => {
       callInterviewPractice();
       setTimeout(function() {startRecognition();}, 23000);
     });
+    //練習終了ボタン
     const stopButton = document.querySelector(".stop");
     stopButton.addEventListener("click", () => {
       stopButtonRecognition();
     });
+    //回答完了ボタン
+    const RecognitionStopButton = document.querySelector(".RecognitionStop");
+    RecognitionStopButton.addEventListener("click",() =>{
+      stopRecognition();
+    })
 
   </script>
 </body>
