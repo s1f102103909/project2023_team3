@@ -70,3 +70,4 @@ def display_video(request):
     video_path = 'output.mp4'  # output.avi の実際のパスに置き換えてください
     context = {'video_path': video_path}
     return render(request, 'video_display.html', context)
+
