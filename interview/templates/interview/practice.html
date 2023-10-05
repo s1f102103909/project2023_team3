@@ -13,7 +13,8 @@
   {{ chat_results }}
   <main>
     <button type="button" class="start">回答開始</button>
-    <button type="button" class="stop">終了</button>
+    <button type="button" class="StopRecognition">回答完了</button>
+    <button type="button" class="stop">練習終了</button>
     <div class="output"></div>
     <div class="response-container"></div>
   </main>
@@ -37,21 +38,21 @@
         }
       }
     };
-
+    //音声認識開始関数
     const startRecognition = () => {
       if (!isListening) {
         recognition.start();
         isListening = true;
       }
     };
-
+    //音声認識停止関数
     const stopRecognition = () => {
       if (isListening) {
         recognition.stop();
         isListening = false;
       }
     };
-
+    //全体停止用関数
     const stopRecognitionButton = () => {
       stopRecognition();
       recognitionButton = false;
@@ -97,11 +98,16 @@
     startButton.addEventListener("click", () => {
       startRecognition();
     });
-
-    const stopButton = document.querySelector(".stop");
-    stopButton.addEventListener("click", () => {
+    //練習全体を停止する
+    const StopButton = document.querySelector(".stop");
+    StopButton.addEventListener("click", () => {
       stopRecognitionButton();
     });
+    //回答完了用
+    const StopRecognitionButton = document.querySelector(".stopRecognition");
+    StopRecognitionButton.addEventListener("click", () => {
+      stopRecognition();
+    })
 
   </script>
 </body>
