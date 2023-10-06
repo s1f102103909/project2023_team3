@@ -14,7 +14,7 @@
   <main>
     <button type="button" class="start">回答開始</button>
     <button type="button" class="StopRecognition">回答完了</button>
-    <button type="button" class="stop">練習終了</button>
+    <button type="button" class="stop">練習終了（無視）</button>
     <div class="output"></div>
     <div class="response-container"></div>
   </main>
@@ -23,10 +23,10 @@
     recognition.lang = "ja";
     recognition.interimResults = true;
     recognition.continuous = true;
-    let isListening = false;
+    //let isListening = false;
     let timeoutIdRecognition; // 2秒のタイムアウト用のタイマーID
     let timeoutIdTextSend; // テキスト送信のタイムアウト用のタイマーID
-    let recognitionButton = true;
+    //let recognitionButton = true;
 
     recognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -40,23 +40,23 @@
     };
     //音声認識開始関数
     const startRecognition = () => {
-      if (!isListening) {
+      //if (!isListening) {
         recognition.start();
-        isListening = true;
-      }
+       // isListening = true;
+      //}
     };
     //音声認識停止関数
     const stopRecognition = () => {
-      if (isListening) {
+      //if (isListening) {
         recognition.stop();
-        isListening = false;
-      }
+      //  isListening = false;
+      //}
     };
     //全体停止用関数
-    const stopRecognitionButton = () => {
-      stopRecognition();
-      recognitionButton = false;
-    };
+    //const stopRecognitionButton = () => {
+    //  stopRecognition();
+    //  recognitionButton = false;
+    //};
 
     const sendText = (transcript) => {
       if (recognitionButton) {
@@ -77,7 +77,7 @@
             responseContainer.appendChild(response);
 
             // テキスト送信が完了したら音声認識を再開
-            startRecognition();
+            //startRecognition();
           }
         };
         xhr.send(JSON.stringify({ text: transcript }));
