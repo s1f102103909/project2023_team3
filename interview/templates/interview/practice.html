@@ -5,7 +5,8 @@
     <title>Document</title>
 </head>
 <body>
-    <a href="{% url 'recording' %}" target="_blank">録画開始</a>
+    <p>録画開始しますか？</p>
+    <a href="{% url 'recording' %}" target="_blank">はい</a>
     <form method="POST">
         {% csrf_token %}
 

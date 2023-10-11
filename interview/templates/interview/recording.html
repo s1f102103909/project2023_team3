@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>qで録画終了</title>
+    <title>録画</title>
 </head>
 <body>
-    <p>録画中...</p>
+    <p id="loadingText">前タブに戻ってください</p>
+
     <script>
-        // ページが読み込まれたらテキストを表示する
-        window.onload = function() {
-            var messageElement = document.getElementById('message');
-            messageElement.style.display = 'block'; // テキストを表示
-        };
+        // このスクリプトはHTML読み込み後に実行されます
+        // ここで読み込み中のテキストを非表示にし、コンテンツを表示するなどの処理を実行できます
+        document.addEventListener('DOMContentLoaded', function () {
+            // コンテンツの読み込み完了後、読み込み中のテキストを非表示にする
+            const loadingText = document.getElementById('loadingText');
+            loadingText.style.display = 'none';
+
+            // ここで他のコンテンツを表示または処理できます
+        });
     </script>
 </body>
 </html>

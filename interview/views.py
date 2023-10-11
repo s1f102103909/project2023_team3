@@ -4,6 +4,7 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 import cv2
+import moviepy.editor as mp
 import datetime
 import time
 
@@ -65,7 +66,7 @@ def interview_recording(request):
         if key == ord('q') or key == ord(' '):
             break
         current_time = time.time()
-        if cv2.waitKey(1) & 0xFF == ord('q') or (current_time - start_time) >= 60:
+        if cv2.waitKey(1) & 0xFF == ord('q') or (current_time - start_time) >= 30:
             break
 
     cap.release()
@@ -73,9 +74,3 @@ def interview_recording(request):
     cv2.destroyAllWindows()
     return HttpResponse("録画を保存しました")
 
-
-
-def display_video(request):
-    video_path = 'project2023_team3/output.mp4'  # output.avi の実際のパスに置き換えてください
-    context = {'video_path': video_path}
-    return render(request, 'video_display.html', context)
