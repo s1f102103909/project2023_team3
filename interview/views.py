@@ -20,7 +20,6 @@ from .forms import SignUpForm
 #api key
 openai.api_key = '234beG84Ybh7BeumEJr6kfmjPSulkprNO9a_BRS89Ai922HJmqVkS7RYt29B3r_YtvnTcegVG7Jczx06iQ6cHzw'
 openai.api_base = 'https://api,openai.iniad.org/api/v1'
-SoundFile_Path = "/soundfile/file.wav"
 from .tests import speech_active
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -52,7 +51,6 @@ def interview_practice(request):
         res = response.replace('面接官:', '')
         chat_results = res
 
-<<<<<<< Updated upstream
             
     else:
         form = ChatForm()
@@ -62,65 +60,8 @@ def interview_practice(request):
         'chat_results' : chat_results
     }
     return HttpResponse(template.render(context, request))
+
 import json
-=======
-def start(request):
-    # ボタンを押すなどのイベントがない場合は一定時間後に自動で録音を開始
-    N = 5  # 無音検出時間（秒）
-    THRESHOLD = 2000  # 音量のしきい値
-
-    # 音声録音関係のパラメータ
-    FORMAT = pyaudio.paInt16
-    CHANNELS = 1
-    RATE = 44100
-    CHUNK = 2**11
-    RECORD_SECONDS = 5
-    WAVE_OUTPUT_FILENAME = "file.wav"
-
-    iAudio = pyaudio.PyAudio()
-
-    # 録音開始
-    stream = iAudio.open(format=FORMAT, channels=CHANNELS,
-                    rate=RATE, input=True,
-                    frames_per_buffer=CHUNK)
-
-    frames = []
-
-    for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-        data = stream.read(CHUNK)
-        frames.append(data)
-        rms = audioop.rms(data, 2)  # 音量の取得
-        if rms < THRESHOLD:  # 音量がしきい値を下回ったらカウント開始
-            time.sleep(N)
-            rms = audioop.rms(stream.read(CHUNK), 2)
-            if rms < THRESHOLD:  # N秒後もしきい値を下回っていたら録音終了
-                break
-
-    # 録音終了
-    stream.stop_stream()
-    stream.close()
-    iAudio.terminate()
-
-    waveFile = wave.open(SoundFile_Path, 'wb')
-    waveFile.setnchannels(CHANNELS)
-    waveFile.setsampwidth(iAudio.get_sample_size(FORMAT))
-    waveFile.setframerate(RATE)
-    waveFile.writeframes(b''.join(frames))
-    waveFile.close()
-
-def speech_to_text(filepath):
-
-    # ファイルを開く
-    audio_file= open(filepath, "rb")
-
-    # Speech to Text変換
-    response = openai.Audio.transcribe(model = "whisper-1", # Speech-to-Textモデル
-                                       file  = audio_file,  # オーディオファイル
-                                      )
-    
-    # 変換後のテキスト出力
-    return response.text
->>>>>>> Stashed changes
 
 
 def score(request):

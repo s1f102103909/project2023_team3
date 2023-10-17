@@ -43,12 +43,6 @@ def generate_answer(prompt):
     vv.speak(text=answer)
     return answer
 
-#def text_to_speech(response):
-    engine = pyttsx3.init()
-    engine.setProperty("rate", 75)
-    engine.say("{}".format(response))
-    engine.runAndWait()
-
 class Voicevox:
     def __init__(self,host="127.0.0.1",port=50021):
         self.host = host

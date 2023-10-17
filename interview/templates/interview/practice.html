@@ -24,7 +24,7 @@
     recognition.interimResults = true;
     recognition.continuous = true;
     //let isListening = false;
-    let timeoutIdRecognition; // 2秒のタイムアウト用のタイマーID
+    let timeoutIdRecognition; // 5秒のタイムアウト用のタイマーID
     let timeoutIdTextSend; // テキスト送信のタイムアウト用のタイマーID
     //let recognitionButton = true;
 
@@ -35,21 +35,24 @@
           let transcript = event.results[i][0].transcript;
           const output = document.querySelector(".output");
           output.textContent = transcript;
+          //const response = document.createElement("div");
+          //responseContainer.appendChild(response);
         }
       }
+      
     };
     //音声認識開始関数
     const startRecognition = () => {
       //if (!isListening) {
         recognition.start();
-       // isListening = true;
+        //isListening = true;
       //}
     };
     //音声認識停止関数
     const stopRecognition = () => {
       //if (isListening) {
         recognition.stop();
-      //  isListening = false;
+        //isListening = false;
       //}
     };
     //全体停止用関数
@@ -59,7 +62,6 @@
     //};
 
     const sendText = (transcript) => {
-      if (recognitionButton) {
         // CSRF Tokenを取得
         let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -81,16 +83,15 @@
           }
         };
         xhr.send(JSON.stringify({ text: transcript }));
-      }
-    };
+      };
 
     recognition.onend = () => {
       // 2秒間音声が検出されない場合、音声認識を停止してテキスト送信を開始
-      timeoutIdRecognition = setTimeout(() => {
-        stopRecognition();
+      //timeoutIdRecognition = setTimeout(() => {
+        //stopRecognition();
         const transcript = document.querySelector(".output").textContent;
         sendText(transcript);
-      }, 2000);
+      //}, 5000);
     };
 
     // "練習開始"ボタンをクリックしたときに音声認識を開始
@@ -103,11 +104,14 @@
     StopButton.addEventListener("click", () => {
       stopRecognitionButton();
     });
-    //回答完了用
-    const StopRecognitionButton = document.querySelector(".stopRecognition");
+    // "回答完了"ボタンをクリックしたときに音声認識を停止し、認識したテキストを送信
+    const StopRecognitionButton = document.querySelector(".StopRecognition");
     StopRecognitionButton.addEventListener("click", () => {
-      stopRecognition();
-    })
+      stopRecognition(); // 音声認識を停止
+      //const transcript = document.querySelector(".output").textContent; // 認識したテキストを取得
+      //sendText(transcript); // テキストを送信
+    });
+
 
   </script>
 </body>
