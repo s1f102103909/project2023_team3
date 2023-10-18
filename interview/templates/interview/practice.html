@@ -6,14 +6,28 @@
     <title>Document</title>
 </head>
 <body>
-    <a href="{% url 'recording' %}" target="_blank">録画開始</a>
-    <form method="POST">
+    <form id="form" method="POST" action="{% url 'practice' %}">
         {% csrf_token %}
-
-        <button type="submit">練習開始</button>
+        <button id="startCamera" type="submit">練習開始</button>
     </form>
-
     {{ chat_results }}
     <br>
+    <br>
+    <!--img src="{{ image }}"  width="810" height="540"-->
+    <img id="video" src="{% url 'camera_stream' %}" width="810" height="540">
+    
+    <!--video id="cameraView" autoplay></video-->
+    <!--script>
+        const startButton = document.getElementById("startCamera");
+        const video = document.getElementById("video");
+       
+        startButton.addEventListener("click", function(event) {
+            if (video.style.visibility === "hidden"){
+                video.style.visibility = 'visible';
+            }
+        });
+
+    </script-->
+
 </body>
 </html>

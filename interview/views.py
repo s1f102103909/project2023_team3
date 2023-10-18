@@ -1,9 +1,13 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 import cv2
+from django.views import View
+from django.views.decorators import gzip
+from django.views.decorators.http import require_http_methods, require_POST, require_GET
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 
@@ -25,49 +29,44 @@ def interview_practice(request):
                  """
         response = generate_answer(prompt)
         chat_results = response
-            
     else:
         form = ChatForm()
     template = loader.get_template('interview/practice.html')
     context = {
         'form' : form, 
-        'chat_results' : chat_results
+        'chat_results' : chat_results,
+        #'image': image,
     }
     return HttpResponse(template.render(context, request))
 
-def interview_recording(request):
-    cap = cv2.VideoCapture(0)
+# ストリーミング画像・映像を表示するview
+#@require_GET
+#class IndexView(View):
+    #def get(self, request):
+        #return render(request, "practice.html", {})
 
-    if not cap.isOpened():
-        return HttpResponse("Failed to open the camera.")
+# ストリーミング画像を定期的に返却するview
+@gzip.gzip_page
+#@require_POST
+def camera_stream(request):
+    #if request.method == "POST":
+        return StreamingHttpResponse(generate_frame(), content_type='multipart/x-mixed-replace; boundary=frame')
 
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter('output.mp4', fourcc, fps, (w, h))
+# フレーム生成・返却する処理
+def generate_frame():
+    capture = cv2.VideoCapture(0)
 
     while True:
-        ret, frame = cap.read()
-
+        if not capture.isOpened():
+            print("Capture is not opened.")
+            break
+        # カメラからフレーム画像を取得
+        ret, frame = capture.read()
         if not ret:
+            print("Failed to read frame.")
             break
-
-        cv2.imshow('camera', frame)
-        out.write(frame)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    out.release()
-    cv2.destroyAllWindows()
-    return HttpResponse("Recording completed")
-
-
-
-def display_video(request):
-    video_path = 'output.mp4'  # output.avi の実際のパスに置き換えてください
-    context = {'video_path': video_path}
-    return render(request, 'video_display.html', context)
-
+        # フレーム画像バイナリに変換
+        ret, jpeg = cv2.imencode('.jpg', frame)
+        byte_frame = jpeg.tobytes()
+        # フレーム画像のバイナリデータをユーザーに送付する
+        yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + byte_frame + b'\r\n\r\n')
