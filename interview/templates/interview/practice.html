@@ -5,6 +5,44 @@
     <title>Document</title>
 </head>
 <body>
+    <button id="startRecording">スタート</button>
+    <script>
+      document.getElementById('startRecording').addEventListener('click', async () => {
+       try {
+         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    
+         const mediaRecorder = new MediaRecorder(stream);
+         const audioChunks = [];
+
+         mediaRecorder.ondataavailable = (event) => {
+           if (event.data.size > 0) {
+             audioChunks.push(event.data);
+           }
+         };
+
+         mediaRecorder.onstop = () => {
+           const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+
+           // ダウンロード用のリンクを生成
+           const audioUrl = URL.createObjectURL(audioBlob);
+           const downloadLink = document.createElement('a');
+           downloadLink.href = audioUrl;
+           downloadLink.download = 'recorded_audio.wav'; // ダウンロード時のファイル名
+           downloadLink.innerHTML = '録音をダウンロード';
+           document.body.appendChild(downloadLink);
+
+           audioChunks.length = 0; // 音声データをリセット
+         };
+
+         mediaRecorder.start();
+         setTimeout(() => {
+           mediaRecorder.stop();
+         }, 30000); // 30秒後に録音を停止
+       } catch (error) {
+         console.error('マイクへのアクセスが許可されませんでした: ' + error);
+       }
+     });
+    </script>
     <p>録画開始しますか？</p>
     <a href="{% url 'recording' %}" target="_blank">はい</a>
     <form method="POST">
