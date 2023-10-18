@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <title>Document</title>
 </head>
 <body>
@@ -12,8 +13,7 @@
   </form>
   {{ chat_results }}
   <main>
-    <button type="button" class="start">回答開始</button>
-    <button type="button" class="StopRecognition">回答完了</button>
+    <button type="button" class="btn"><img width="30" height="30" src="../../../off.jpg"></button>
     <button type="button" class="stop">練習終了（無視）</button>
     <div class="output"></div>
     <div class="response-container"></div>
@@ -23,94 +23,55 @@
     recognition.lang = "ja";
     recognition.interimResults = true;
     recognition.continuous = true;
-    //let isListening = false;
-    let timeoutIdRecognition; // 5秒のタイムアウト用のタイマーID
-    let timeoutIdTextSend; // テキスト送信のタイムアウト用のタイマーID
-    //let recognitionButton = true;
+    let isListening = false;
 
     recognition.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
-          clearTimeout(timeoutIdRecognition); // 音声が検出されたらタイムアウトタイマーをクリア
+          clearTimeout(timeoutIdRecognition);
           let transcript = event.results[i][0].transcript;
           const output = document.querySelector(".output");
           output.textContent = transcript;
-          //const response = document.createElement("div");
-          //responseContainer.appendChild(response);
         }
       }
-      
     };
-    //音声認識開始関数
-    const startRecognition = () => {
-      //if (!isListening) {
-        recognition.start();
-        //isListening = true;
-      //}
-    };
-    //音声認識停止関数
-    const stopRecognition = () => {
-      //if (isListening) {
+
+    const startStopButton = document.querySelector(".btn");
+    startStopButton.addEventListener("click", () => {
+      if (isListening) {
+        // 音声認識を停止
         recognition.stop();
-        //isListening = false;
-      //}
-    };
-    //全体停止用関数
-    //const stopRecognitionButton = () => {
-    //  stopRecognition();
-    //  recognitionButton = false;
-    //};
+        isListening = false;
+      } else {
+        // 音声認識を開始
+        recognition.start();
+        isListening = true;
+      }
+    });
 
     const sendText = (transcript) => {
-        // CSRF Tokenを取得
-        let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        // Ajaxリクエストを作成してテキストを送信
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "/process_text/", true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        // リクエストヘッダにCSRFトークンを設定
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            const responseContainer = document.querySelector(".response-container");
-            const response = document.createElement("div");
-            response.textContent = JSON.parse(xhr.responseText).message;
-            responseContainer.appendChild(response);
-
-            // テキスト送信が完了したら音声認識を再開
-            //startRecognition();
-          }
-        };
-        xhr.send(JSON.stringify({ text: transcript }));
+      let xhr = new XMLHttpRequest();
+      xhr.open("POST", "/process_text/", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          const responseContainer = document.querySelector(".response-container");
+          const response = document.createElement("div");
+          response.textContent = JSON.parse(xhr.responseText).message;
+          responseContainer.appendChild(response);
+        }
       };
-
-    recognition.onend = () => {
-      // 2秒間音声が検出されない場合、音声認識を停止してテキスト送信を開始
-      //timeoutIdRecognition = setTimeout(() => {
-        //stopRecognition();
-        const transcript = document.querySelector(".output").textContent;
-        sendText(transcript);
-      //}, 5000);
+      xhr.send(JSON.stringify({ text: transcript }));
     };
 
-    // "練習開始"ボタンをクリックしたときに音声認識を開始
-    const startButton = document.querySelector(".start");
-    startButton.addEventListener("click", () => {
-      startRecognition();
-    });
-    //練習全体を停止する
-    const StopButton = document.querySelector(".stop");
-    StopButton.addEventListener("click", () => {
-      stopRecognitionButton();
-    });
-    // "回答完了"ボタンをクリックしたときに音声認識を停止し、認識したテキストを送信
-    const StopRecognitionButton = document.querySelector(".StopRecognition");
-    StopRecognitionButton.addEventListener("click", () => {
-      stopRecognition(); // 音声認識を停止
-      //const transcript = document.querySelector(".output").textContent; // 認識したテキストを取得
-      //sendText(transcript); // テキストを送信
-    });
+    recognition.onend = () => {
+          const transcript = document.querySelector(".output").textContent;
+          sendText(transcript);
+    };
+
 
 
   </script>
