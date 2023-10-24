@@ -6,6 +6,8 @@ import openai
 from django.http import HttpResponse
 from django.views import View
 import cv2
+from langchain import OpenAI, LLMChain, PromptTemplate
+from langchain.memory import ConversationBufferMemory
 
 API_KEY = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
