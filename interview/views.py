@@ -102,6 +102,6 @@ def process_text(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
-        response = generate_answer(text)
+        response = interview_practice(text)
 
         return JsonResponse({'message': response})
