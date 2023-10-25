@@ -8,6 +8,7 @@ from django.views import View
 from django.views.decorators import gzip
 from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from django.views.decorators.csrf import csrf_exempt
+import time
 
 # Create your views here.
 
@@ -51,10 +52,14 @@ def camera_stream(request):
     #if request.method == "POST":
         return StreamingHttpResponse(generate_frame(), content_type='multipart/x-mixed-replace; boundary=frame')
 
+
+fourcc = cv2.VideoWriter_fourcc(*'XVID')  # 動画コーデックの設定（XVIDは一般的なコーデック）
+out = cv2.VideoWriter('output.avi', fourcc, 20.0, (810, 540))  # ファイル名、コーデック、フレームレート、フレームサイズを設定
 # フレーム生成・返却する処理
 def generate_frame():
     capture = cv2.VideoCapture(0)
 
+    start_time = time.time()
     while True:
         if not capture.isOpened():
             print("Capture is not opened.")
@@ -67,5 +72,15 @@ def generate_frame():
         # フレーム画像バイナリに変換
         ret, jpeg = cv2.imencode('.jpg', frame)
         byte_frame = jpeg.tobytes()
+
+        # フレームを動画ファイルに書き込む
+        out.write(frame)
         # フレーム画像のバイナリデータをユーザーに送付する
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + byte_frame + b'\r\n\r\n')
+
+        current_time = time.time()
+        if (current_time - start_time) >= 30:
+            break
+    out.release()
+
+        
