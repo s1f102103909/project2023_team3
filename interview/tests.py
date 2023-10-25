@@ -37,6 +37,10 @@ chatgpt_chain = LLMChain(
     verbose=True,
     memory=ConversationBufferWindowMemory(k=10),
 )
+
+def langchain_GPT(text):
+    output = chatgpt_chain.predict(input=text)
+    return output
 '''
 def generate_answer(prompt):
 
@@ -59,7 +63,3 @@ def generate_answer(prompt):
     answer = response['choices'][0]['message']['content']
     return answer
 '''
-
-def langchain_GPT(text):
-    output = chatgpt_chain.predict(input=text)
-    return output
