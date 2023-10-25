@@ -16,6 +16,7 @@
     <button type="button" class="btn">回答開始</button>
     <button type="button" class="stop">練習終了（無視）</button>
     <div class="output"></div>
+    <div class="output-container"></div>
     <div class="response-container"></div>
   </main>
   <script>
@@ -71,6 +72,10 @@
 
     recognition.onend = () => {
           const transcript = document.querySelector(".output").textContent;
+          const outputcontainer = document.querySelector(".output-container");
+          const response = document.createElement("div");
+          response.textContent = transcript;
+          outputcontainer.appendChild(response);
           sendText(transcript);
     };
 
