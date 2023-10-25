@@ -11,24 +11,7 @@
         {% csrf_token %}
         <button type="submit">練習開始</button>
     </form>
-
-    <div id="recording-status" style="display: none;">
-        <p>録音中...</p>
-        <button type="button" id="stop-recording">録音を停止</button>
-    </div>
-
     {{ chat_results }}
     <br>
-
-    <script>
-        var recordingStatus = document.getElementById("recording-status");
-        var stopRecordingButton = document.getElementById("stop-recording");
-        
-        stopRecordingButton.addEventListener("click", function () {
-            // 録音停止の処理を実行
-            // ここで録音を停止し、サーバーに送信などの処理を実行できます
-            recordingStatus.style.display = "none";
-        });
-    </script>
 </body>
 </html>

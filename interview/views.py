@@ -41,19 +41,6 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 
-def record_audio(request):
-    if request.method == 'POST':
-        audio_file = request.FILES['audio_file']
-        if audio_file:
-            # ファイルを指定のフォルダに保存
-            fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'recorded_audio'))
-            filename = fs.save(audio_file.name, audio_file)
-
-            # ここでファイルを処理できます
-
-            return HttpResponse("録音が成功しました。")
-    return render(request, 'interview/practice.html')
-
 def interview_recording(request):
     current_datetime = datetime.datetime.now()
     formatted_datetime = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
