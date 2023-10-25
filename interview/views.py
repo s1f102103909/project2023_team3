@@ -35,7 +35,6 @@ def interview_practice(request):
     context = {
         'form' : form, 
         'chat_results' : chat_results,
-        #'image': image,
     }
     return HttpResponse(template.render(context, request))
 
