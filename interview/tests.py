@@ -8,17 +8,20 @@ import pyaudio
 import wave
 import numpy as np
 import time
-
 import requests, json
 import io
+from langchain.llms.openai import OpenAI 
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from langchain.memory import ConversationBufferWindowMemory
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']='glossy-aloe-396205-d7fdd774bdbe.json'
 
-API_KEY = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
+API_KEY_INIAD = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
 
 speech_active = False
-
+'''
 def generate_answer(prompt):
     openai.api_key = API_KEY
     openai.api_base = API_BASE
@@ -43,6 +46,46 @@ def generate_answer(prompt):
     vv.speak(text=answer)
     return answer
 
+def text_to_speech(response):
+    engine = pyttsx3.init()
+    engine.setProperty("rate", 75)
+    engine.say("{}".format(response))
+    engine.runAndWait()
+'''
+
+#openai.api_key = API_KEY_INIAD
+#openai.api_key = API_KEY
+#openai.api_base = API_BASE
+#openai.Model.list() #OpenAIのインスタンスを生成
+
+#OpenAI.openai_api_key = API_KEY_INIAD
+#OpenAI.openai_api_key = API_KEY
+#OpenAI.openai_api_base = API_BASE
+    
+    
+template = """
+            {history}
+            面接者: {input}
+            AI:""
+            """
+prompt = PromptTemplate(
+        input_variables = ["history","input"],
+        template = template
+)
+chatgpt_chain = LLMChain(
+    llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
+    prompt=prompt,
+    verbose=True,
+    memory=ConversationBufferWindowMemory(k=10),
+)
+
+def langchain_GPT(text):
+    output = chatgpt_chain.predict(input=text)
+    output = output.replace('面接官:', '')
+    vv = Voicevox()
+    vv.speak(text=output)
+    return output
+    
 class Voicevox:
     def __init__(self,host="127.0.0.1",port=50021):
         self.host = host
