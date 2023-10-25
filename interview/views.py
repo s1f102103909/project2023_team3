@@ -103,7 +103,7 @@ def process_text(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
-        #response = interview_practice(text)
+        response = interview_practice(text)
         response = langchain_GPT(text)
 
         return JsonResponse({'message': response})
