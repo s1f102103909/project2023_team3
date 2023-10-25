@@ -3,7 +3,6 @@ from django.test import TestCase
 # Create your tests here.
 import os
 import openai
-import pyttsx3
 import pyaudio
 import wave
 import numpy as np
@@ -45,12 +44,6 @@ def generate_answer(prompt):
     vv=Voicevox()
     vv.speak(text=answer)
     return answer
-
-def text_to_speech(response):
-    engine = pyttsx3.init()
-    engine.setProperty("rate", 75)
-    engine.say("{}".format(response))
-    engine.runAndWait()
 '''
 
 #openai.api_key = API_KEY_INIAD

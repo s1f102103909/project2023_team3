@@ -1,19 +1,10 @@
 
 from django.shortcuts import render
 import openai
-import pyaudio
-import wave
-import numpy as np
-import time
-import audioop
-import gtts
-from playsound import playsound
-from io import BytesIO
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
-#from .tests import generate_answer
 from .tests import langchain_GPT
 from .models import UserInformation
 from django.contrib.auth.decorators import login_required
@@ -21,14 +12,9 @@ from .forms import SignUpForm
 #api key
 openai.api_key = '234beG84Ybh7BeumEJr6kfmjPSulkprNO9a_BRS89Ai922HJmqVkS7RYt29B3r_YtvnTcegVG7Jczx06iQ6cHzw'
 openai.api_base = 'https://api,openai.iniad.org/api/v1'
-from .tests import speech_active
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import speech_recognition as sr
-from pydub import AudioSegment
-import io
-from .tests import Voicevox
-
+import json
 # Create your views here.
 
 def home(request):
@@ -61,8 +47,6 @@ def interview_practice(request):
         'chat_results' : chat_results
     }
     return HttpResponse(template.render(context, request))
-
-import json
 
 
 def score(request):
@@ -103,7 +87,6 @@ def process_text(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
-        response = interview_practice(text)
         response = langchain_GPT(text)
 
         return JsonResponse({'message': response})
