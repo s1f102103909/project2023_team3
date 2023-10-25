@@ -10,11 +10,14 @@ import numpy as np
 import time
 import requests, json
 import io
-
+from langchain.llms.openai import OpenAI 
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from langchain.memory import ConversationBufferWindowMemory
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']='glossy-aloe-396205-d7fdd774bdbe.json'
 
-API_KEY = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
+API_KEY_INIAD = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
 
 speech_active = False
@@ -43,7 +46,7 @@ def generate_answer(prompt):
     vv.speak(text=answer)
     return answer
 
-#def text_to_speech(response):
+def text_to_speech(response):
     engine = pyttsx3.init()
     engine.setProperty("rate", 75)
     engine.say("{}".format(response))
@@ -78,6 +81,9 @@ chatgpt_chain = LLMChain(
 
 def langchain_GPT(text):
     output = chatgpt_chain.predict(input=text)
+    output = output.replace('面接官:', '')
+    vv = Voicevox()
+    vv.speak(text=output)
     return output
     
 class Voicevox:

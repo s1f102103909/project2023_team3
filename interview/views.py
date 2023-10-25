@@ -11,7 +11,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
-from .tests import generate_answer
+#from .tests import generate_answer
+from .tests import langchain_GPT
 from .models import UserInformation
 from django.contrib.auth.decorators import login_required
 from .forms import SignUpForm
@@ -45,7 +46,7 @@ def interview_practice(request):
                 ・質問を1つずつしてください
                 ・私の回答に1つ1つに、採点を行なってください。
                  """
-        response = generate_answer(prompt)
+        response = langchain_GPT(prompt)
         res = response.replace('面接官:', '')
         chat_results = res
 
@@ -99,6 +100,6 @@ def process_text(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
-        response = generate_answer(text)
+        response = langchain_GPT(text)
 
         return JsonResponse({'message': response})
