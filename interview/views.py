@@ -3,8 +3,11 @@ from django.http import HttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
-import cv2
 import moviepy.editor as mp
+from django.core.files.storage import FileSystemStorage
+import os
+from django.conf import settings
+import cv2
 import datetime
 import time
 
@@ -38,12 +41,24 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 
+def record_audio(request):
+    if request.method == 'POST':
+        audio_file = request.FILES['audio_file']
+        if audio_file:
+            # ファイルを指定のフォルダに保存
+            fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'recorded_audio'))
+            filename = fs.save(audio_file.name, audio_file)
+
+            # ここでファイルを処理できます
+
+            return HttpResponse("録音が成功しました。")
+    return render(request, 'interview/practice.html')
+
 def interview_recording(request):
     current_datetime = datetime.datetime.now()
     formatted_datetime = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
     output_filename = f"output{formatted_datetime}.mp4"
     cap = cv2.VideoCapture(0)
-
     if not cap.isOpened():
         return HttpResponse("Failed to open the camera.")
 
@@ -73,4 +88,3 @@ def interview_recording(request):
     out.release()
     cv2.destroyAllWindows()
     return HttpResponse("録画を保存しました")
-
