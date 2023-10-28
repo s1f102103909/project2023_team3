@@ -58,8 +58,7 @@ def generate_answer(prompt):
     
 template = """
             {history}
-            面接者: {input}
-            AI:""
+            {input}
             """
 prompt = PromptTemplate(
         input_variables = ["history","input"],
