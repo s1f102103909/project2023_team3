@@ -60,9 +60,6 @@ def generate_frame():
     width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = capture.get(cv2.CAP_PROP_FPS)
-    #print(width)
-    #print(height)
-    #print(fps)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
     out = cv2.VideoWriter('output.mp4', fourcc, fps, (width, height))  # ファイル名、コーデック、フレームレート、フレームサイズを設定
 
