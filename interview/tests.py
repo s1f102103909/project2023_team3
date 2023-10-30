@@ -14,6 +14,8 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferWindowMemory
 
+import deepl
+
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']='glossy-aloe-396205-d7fdd774bdbe.json'
 
 API_KEY_INIAD = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
@@ -127,3 +129,26 @@ class Voicevox:
             stream.stop_stream()
             stream.close()
             p.terminate()
+
+
+    #日本語を英語に翻訳
+def JP_To_EN(text):
+    sourse_lang = 'JA'
+    traget_lang = 'EN-US' # EN-GB
+
+    translator = deepl.Translator('API-KEY')
+
+    result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
+    
+    return result
+
+    #英語を日本語に翻訳
+def EN_To_JP(text):
+    sourse_lang = 'EN'
+    traget_lang = 'JA'
+
+    translator = deepl.Translator('API-KEY')
+
+    result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
+    
+    return result
