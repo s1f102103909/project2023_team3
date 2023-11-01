@@ -18,6 +18,11 @@ import json
 from django.views.decorators import gzip
 import time
 import cv2
+import sounddevice as sd
+import soundfile as sf
+import threading
+import sys
+import moviepy.editor as mp
 # Create your views here.
 
 def home(request):
@@ -41,7 +46,7 @@ def interview_practice(request):
                 ・自問自答しないでください。
                  """
         response = langchain_GPT(prompt)
-        res = response.replace('面接官:', '')
+        res = response.replace('面接官：', '')
         chat_results = res
 
             
@@ -113,7 +118,16 @@ def generate_frame():
     height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = capture.get(cv2.CAP_PROP_FPS)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
-    out = cv2.VideoWriter('output.mp4', fourcc, fps, (width, height))  # ファイル名、コーデック、フレームレート、フレームサイズを設定
+    video_filename = 'output.mp4'
+    out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))  # ファイル名、コーデック、フレームレート、フレームサイズを設定
+
+    audio_filename = 'output_audio.mp3'
+    channels = 1 # ステレオ
+    duration = 30
+
+    audio_thread = threading.Thread(target=audio_capure, args=(audio_filename, channels, duration))
+    audio_thread.start()
+
 
     start_time = time.time()
     while True:
@@ -124,6 +138,7 @@ def generate_frame():
         ret, frame = capture.read()
         # フレームを動画ファイルに書き込む
         out.write(frame)
+
         if not ret:
             print("Failed to read frame.")
             break
@@ -138,4 +153,20 @@ def generate_frame():
         if (current_time - start_time) >= 30:
             break
     out.release()
+    audio_thread.join()
+
+    video = mp.VideoFileClip(video_filename)
+    video = video.set_audio(mp.AudioFileClip(audio_filename))
+    video.write_videofile("main.mp4")
+    #user.video = 'output.mp4'
+    #user.save()
+
+def audio_capure(audio_filename, channels, duration):
+    print("Recordin audio...")
+    audio_data = sd.rec(int(44100*duration), 44100, channels=channels)
+    sd.wait()
+    sf.write(audio_filename, audio_data, 44100)
+    print("Audio recording completed.")
+
+
     
