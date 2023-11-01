@@ -4,10 +4,7 @@ from .forms import ChatForm
 from django.template import loader
 from .tests import generate_answer
 import cv2
-from django.views import View
 from django.views.decorators import gzip
-from django.views.decorators.http import require_http_methods, require_POST, require_GET
-from django.views.decorators.csrf import csrf_exempt
 import time
 
 # Create your views here.
@@ -38,12 +35,6 @@ def interview_practice(request):
         'chat_results' : chat_results,
     }
     return HttpResponse(template.render(context, request))
-
-# ストリーミング画像・映像を表示するview
-#@require_GET
-#class IndexView(View):
-    #def get(self, request):
-        #return render(request, "practice.html", {})
 
 # ストリーミング画像を定期的に返却するview
 @gzip.gzip_page
