@@ -2,7 +2,7 @@
 from django.shortcuts import render
 import openai
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from .forms import ChatForm
 from django.template import loader
 from .tests import langchain_GPT
