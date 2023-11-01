@@ -26,6 +26,9 @@ import speech_recognition as sr
 from pydub import AudioSegment
 import io
 from .tests import Voicevox
+import requests 
+import json 
+import os
 
 # Create your views here.
 
@@ -102,3 +105,49 @@ def process_text(request):
         response = generate_answer(text)
 
         return JsonResponse({'message': response})
+
+######変更部分＃＃＃＃＃
+ 
+
+def emotion(request,x):
+    url = "https://ai-api.userlocal.jp/voice-emotion/basic-emotions"
+    #emotion_result = []
+    with open('../project2023_team3/voice({:>3}).mp3'.format(x), 'rb') as voice:
+        response = requests.post(url, files={"voice_data": voice}) 
+        result = json.loads(response.content)
+    for emotion in result['emotion_detail'].keys(): 
+        if "neutral" in emotion:
+            if 'values' not in request.session:
+               request.session['values'] = []
+            request.session['values'].append(f"{emotion}: {result['emotion_detail'][emotion]}")
+            #emotion_result.append(f"{emotion}: {result['emotion_detail'][emotion]}")
+    
+
+def calculate_average(request):
+    values = request.session.get('values', [])
+    if values:
+        average = sum(values) / len(values)
+        return JsonResponse({'average': average})
+    else:
+        return JsonResponse({'error': 'No values available for calculation'})
+
+
+
+
+
+
+
+
+
+#def emotion_fin(request):
+    #n = 0
+    #mid_result = 0
+    #dir = '../project2023_team3'
+    
+
+    #for i in range(0,sum(os.path.isfile(os.path.join(dir, name)) for name in os.listdir(dir))+1):
+        #n += 1
+        #x = emotion(request,i)
+        #mid_result += x
+    #result = mid_result/n
+    #return JsonResponse({'result': result})

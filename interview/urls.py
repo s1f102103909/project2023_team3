@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import emotion_fin
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -9,4 +10,5 @@ urlpatterns = [
     #path('transcribe/', views.transcribe_audio, name='transcribe_audio'),
     path('process_text/',views.process_text,name='process'),
     path('check_speech_end/', views.check_speech_end, name='check_speech_end'),
+     path('calculate_average/', views.calculate_average, name='calculate_average'),
 ]
