@@ -1,19 +1,35 @@
 <!DOCTYPE html>
 <html lang="ja">
  <head>
-  <meta charset="utf-8"><title>Home</title>
-  <link rel="stylesheet" type="text/css" href="css/base.css">
+  <meta charset="utf-8">
+  <title>Home</title>
+  <link rel="stylesheet" href="../css/base.css">
  </head>
   <body>
     <h1 class="emph">Home</h1>
 
     {% if user.is_authenticated %}
     <p>Hi {{ user.username }}!</p>
-    <a href="{% url 'practice' %}">面接練習</a>
-    <br>
-    <a href="{% url 'score'%}" >スコア確認</a>
-    <br>
     <a href="{% url 'logout' %}">logout</a>
+    <div class="tab-003">
+      <label>
+        <input type="radio" name="tab-003" checked>
+        面接練習
+        <!--<a href="{% url 'practice' %}">面接練習</a>-->
+      </label>
+      <div>
+        面接オプション
+      </div>
+
+      <label>
+        <input type="radio" name="tab-003">
+        <!--<a href="{% url 'score'%}" >スコア確認</a>-->
+        スコア確認
+      </label>
+      <div>
+        スコア
+      </div>
+    </div>
     {% else %}
     <p>You are not logged in.</p>
     <p><a href="{% url 'login' %}">login</a></p>
