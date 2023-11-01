@@ -15,6 +15,9 @@ openai.api_base = 'https://api,openai.iniad.org/api/v1'
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.views.decorators import gzip
+import time
+import cv2
 # Create your views here.
 
 def home(request):
@@ -93,3 +96,45 @@ def process_text(request):
         response = langchain_GPT(text)
 
         return JsonResponse({'message': response})
+    
+# ストリーミング画像を定期的に返却するview
+@gzip.gzip_page
+#@require_POST
+def camera_stream(request):
+    #if request.method == "POST":
+        return StreamingHttpResponse(generate_frame(), content_type='multipart/x-mixed-replace; boundary=frame')
+
+
+
+# フレーム生成・返却する処理
+def generate_frame():
+    capture = cv2.VideoCapture(0)
+    width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
+    out = cv2.VideoWriter('output.mp4', fourcc, fps, (width, height))  # ファイル名、コーデック、フレームレート、フレームサイズを設定
+
+    start_time = time.time()
+    while True:
+        if not capture.isOpened():
+            print("Capture is not opened.")
+            break
+        # カメラからフレーム画像を取得
+        ret, frame = capture.read()
+        # フレームを動画ファイルに書き込む
+        out.write(frame)
+        if not ret:
+            print("Failed to read frame.")
+            break
+        # フレーム画像バイナリに変換
+        ret, jpeg = cv2.imencode('.jpg', frame)
+        byte_frame = jpeg.tobytes()
+
+        # フレーム画像のバイナリデータをユーザーに送付する
+        yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + byte_frame + b'\r\n\r\n')
+
+        current_time = time.time()
+        if (current_time - start_time) >= 30:
+            break
+    out.release()

@@ -9,4 +9,5 @@ urlpatterns = [
     #path('transcribe/', views.transcribe_audio, name='transcribe_audio'),
     path('process_text/',views.process_text,name='process'),
     path('check_speech_end/', views.check_speech_end, name='check_speech_end'),
+    path('camera_stream', views.camera_stream, name='camera_stream'),
 ]
