@@ -138,3 +138,4 @@ def generate_frame():
         if (current_time - start_time) >= 30:
             break
     out.release()
+    
