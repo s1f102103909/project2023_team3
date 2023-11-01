@@ -9,8 +9,9 @@ from .tests import langchain_GPT
 from .models import UserInformation
 from django.contrib.auth.decorators import login_required
 from .forms import SignUpForm
+import os
 #api key
-openai.api_key = '234beG84Ybh7BeumEJr6kfmjPSulkprNO9a_BRS89Ai922HJmqVkS7RYt29B3r_YtvnTcegVG7Jczx06iQ6cHzw'
+openai.api_key = os.environ["OPENAI_API_KEY"]
 openai.api_base = 'https://api,openai.iniad.org/api/v1'
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
