@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import SignUpForm
 import os
 #api key
-openai.api_key = os.environ["OPENAI_API_KEY"]
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 openai.api_base = 'https://api,openai.iniad.org/api/v1'
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
