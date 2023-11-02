@@ -37,19 +37,16 @@ def interview_practice(request):
         #if form.is_valid():
         #prompt = form.cleaned_data['prompt']
         prompt = """
-                今から面接を始めます。以下の条件に従って、面接を行なってください。
-                ・あなたは面接官で、私は面接者です。
-                ・IT企業の入社面接を想定しください。
-                ・質問を1つずつしてください。
-                ・私の回答に1つ1つに、採点を行なってください。
-                ・採点は面接終了時にしてください。
-                ・自問自答しないでください。
-                 """
+        Interviews will be held now. Please do so according to the following conditions
+        1. you will be the interviewer and I will be the interviewee.
+        2. assume you are hiring a new employee for an IT company.
+        3. please ask 5 questions.
+        4. at the end of the interview, signal the end and grade the interview.
+        """
         response = langchain_GPT(prompt)
-        res = response.replace('面接官：', '')
+        res = response.replace('面接官', '')
         chat_results = res
-
-            
+     
     else:
         form = ChatForm()
     template = loader.get_template('interview/practice.html')

@@ -9,7 +9,7 @@ import numpy as np
 import time
 import requests, json
 import io
-from langchain.llms.openai import OpenAI 
+from langchain.llms.openai import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferWindowMemory
@@ -73,7 +73,7 @@ chatgpt_chain = LLMChain(
 
 def langchain_GPT(text):
     output = chatgpt_chain.predict(input=text)
-    output = output.replace('面接官:', '')
+    output = output.replace('面接官', '')
     vv = Voicevox()
     vv.speak(text=output)
     return output
