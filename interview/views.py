@@ -38,10 +38,10 @@ def interview_practice(request):
         #prompt = form.cleaned_data['prompt']
         prompt = """
         Interviews will be held now. Please do so according to the following conditions
-        1. you will be the interviewer and I will be the interviewee.
-        2. assume you are hiring a new employee for an IT company.
-        3. please ask 5 questions.
-        4. at the end of the interview, signal the end and grade the interview.
+        1. You will be the interviewer and I will be the interviewee.
+        2. Assume you are hiring a new employee for an IT company.
+        3. Please ask 5 questions.
+        4. At the end of the interview, signal the end and grade the interview.
         """
         response = langchain_GPT(prompt)
         res = response.replace('面接官', '')
