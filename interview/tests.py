@@ -13,6 +13,8 @@ from langchain.llms.openai import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferWindowMemory
+import sounddevice as sd
+import soundfile as sf
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']='glossy-aloe-396205-d7fdd774bdbe.json'
 
@@ -127,3 +129,10 @@ class Voicevox:
             stream.stop_stream()
             stream.close()
             p.terminate()
+
+def audio_capure(audio_filename, channels, duration):
+    print("Recordin audio...")
+    audio_data = sd.rec(int(44100*duration), 44100, channels=channels)
+    sd.wait()
+    sf.write(audio_filename, audio_data, 44100)
+    print("Audio recording completed.")

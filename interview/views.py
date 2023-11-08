@@ -1,4 +1,3 @@
-
 from django.shortcuts import render
 import openai
 from django.shortcuts import render, redirect
@@ -18,11 +17,11 @@ import json
 from django.views.decorators import gzip
 import time
 import cv2
-import sounddevice as sd
-import soundfile as sf
 import threading
 import sys
 import moviepy.editor as mp
+from .tests import audio_capure
+
 # Create your views here.
 
 def home(request):
@@ -37,15 +36,16 @@ def interview_practice(request):
         #if form.is_valid():
         #prompt = form.cleaned_data['prompt']
         prompt = """
-        Interviews will be held now. Please do so according to the following conditions
-        1. You will be the interviewer and I will be the interviewee.
-        2. Assume you are hiring a new employee for an IT company.
-        3. Please ask 5 questions.
-        4. At the end of the interview, signal the end and grade the interview.
+        あなたには今から新卒面接の面接官役になってもらいこちらの面接の練習をしてもらいます。以下を気を付けてください。
+            ・最初は名前と学校名を聞いてください
+            ・IT企業の面接ということを意識しながら質問をしてください
+            ・質問は1会話に1つずつお願いします
+        ではお願いします
         """
         response = langchain_GPT(prompt)
         res = response.replace('面接官', '')
         chat_results = res
+        start_recording()
      
     else:
         form = ChatForm()
@@ -110,23 +110,12 @@ def camera_stream(request):
 
 # フレーム生成・返却する処理
 def generate_frame():
+    global frame, width, height, fps
     capture = cv2.VideoCapture(0)
     width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = capture.get(cv2.CAP_PROP_FPS)
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
-    video_filename = 'output.mp4'
-    out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))  # ファイル名、コーデック、フレームレート、フレームサイズを設定
 
-    audio_filename = 'output_audio.mp3'
-    channels = 1 # ステレオ
-    duration = 30
-
-    audio_thread = threading.Thread(target=audio_capure, args=(audio_filename, channels, duration))
-    audio_thread.start()
-
-
-    start_time = time.time()
     while True:
         if not capture.isOpened():
             print("Capture is not opened.")
@@ -134,7 +123,6 @@ def generate_frame():
         # カメラからフレーム画像を取得
         ret, frame = capture.read()
         # フレームを動画ファイルに書き込む
-        out.write(frame)
 
         if not ret:
             print("Failed to read frame.")
@@ -146,24 +134,32 @@ def generate_frame():
         # フレーム画像のバイナリデータをユーザーに送付する
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + byte_frame + b'\r\n\r\n')
 
+
+def result(request):
+    return render(request, 'interview/result.html', {}) 
+
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
+video_filename = 'output.mp4'
+
+audio_filename = 'output_audio.mp3'
+channels = 1 # ステレオ
+duration = 30
+
+def start_recording():
+    start_time = time.time()
+    out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))  # ファイル名、コーデック、フレームレート、フレームサイズを設定
+    audio_thread = threading.Thread(target=audio_capure, args=(audio_filename, channels, duration))
+    audio_thread.start()
+    while True:
+        out.write(frame)
         current_time = time.time()
         if (current_time - start_time) >= 30:
             break
     out.release()
     audio_thread.join()
-
     video = mp.VideoFileClip(video_filename)
     video = video.set_audio(mp.AudioFileClip(audio_filename))
     video.write_videofile("main.mp4")
     #user.video = 'output.mp4'
     #user.save()
-
-def audio_capure(audio_filename, channels, duration):
-    print("Recordin audio...")
-    audio_data = sd.rec(int(44100*duration), 44100, channels=channels)
-    sd.wait()
-    sf.write(audio_filename, audio_data, 44100)
-    print("Audio recording completed.")
-
-
-    
+        
