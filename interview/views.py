@@ -1,16 +1,10 @@
 from django.shortcuts import render
-import openai
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, StreamingHttpResponse
 from .forms import ChatForm
 from django.template import loader
-from .tests import langchain_GPT
 from .models import UserInformation
-from django.contrib.auth.decorators import login_required
 from .forms import SignUpForm
-#api key
-openai.api_key = '234beG84Ybh7BeumEJr6kfmjPSulkprNO9a_BRS89Ai922HJmqVkS7RYt29B3r_YtvnTcegVG7Jczx06iQ6cHzw'
-openai.api_base = 'https://api,openai.iniad.org/api/v1'
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -18,21 +12,67 @@ from django.views.decorators import gzip
 import time
 import cv2
 import threading
-import sys
 import moviepy.editor as mp
 from .tests import audio_capure
+from langchain.llms.openai import OpenAI
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from langchain.memory import ConversationBufferWindowMemory
+from .tests import Voicevox
 
 # Create your views here.
+# global変数
+API_KEY_INIAD = "L3B2f43w_ROMwNtUO52-UFowQ1WfVgjWpOB-erlUg07x_OSgVSB7nbSxY1AtKG7FKTrypUmSqgUiLzOy9cIV73g"
+API_BASE = "https://api.openai.iniad.org/api/v1"
+
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
+video_filename = 'output.mp4'
+fps = 0.0
+width = 0
+height = 0
+out = cv2.VideoWriter()
+
+audio_filename = 'output_audio.mp3'
+channels = 1 # ステレオ
+duration = 30
+
+
+def langchain_GPT(text):
+    output = chatgpt_chain.predict(input=text)
+    output = output.replace('面接官', '')
+    vv = Voicevox()
+    vv.speak(text=output)
+    return output
 
 def home(request):
     return render(request, 'interview/home.html', {}) 
 
 @csrf_exempt
 def interview_practice(request):
+    global chatgpt_chain
     chat_results = ""
+    start_recording_thread = threading.Thread(target=start_recording)
+
+    template = """
+            {history}
+            Human: {input}
+            AI: 
+            """
+    prompt = PromptTemplate(
+        input_variables = ["history","input"],
+        template = template
+    )   
+    chatgpt_chain = LLMChain(
+        llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
+        prompt=prompt,
+        verbose=True,
+        memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
+    )
+
     if request.method == "POST":
         # ChatGPTボタン押下時
         form = ChatForm(request.POST)
+        start_recording_thread.start()
         #if form.is_valid():
         #prompt = form.cleaned_data['prompt']
         prompt = """
@@ -45,8 +85,6 @@ def interview_practice(request):
         response = langchain_GPT(prompt)
         res = response.replace('面接官', '')
         chat_results = res
-        start_recording()
-     
     else:
         form = ChatForm()
     template = loader.get_template('interview/practice.html')
@@ -122,7 +160,6 @@ def generate_frame():
             break
         # カメラからフレーム画像を取得
         ret, frame = capture.read()
-        # フレームを動画ファイルに書き込む
 
         if not ret:
             print("Failed to read frame.")
@@ -134,27 +171,21 @@ def generate_frame():
         # フレーム画像のバイナリデータをユーザーに送付する
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + byte_frame + b'\r\n\r\n')
 
+        # フレームを動画ファイルに書き込む 
+        out.write(frame)
+
+
 
 def result(request):
     return render(request, 'interview/result.html', {}) 
 
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
-video_filename = 'output.mp4'
-
-audio_filename = 'output_audio.mp3'
-channels = 1 # ステレオ
-duration = 30
-
 def start_recording():
-    start_time = time.time()
+    global out, width, height, fps
     out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))  # ファイル名、コーデック、フレームレート、フレームサイズを設定
     audio_thread = threading.Thread(target=audio_capure, args=(audio_filename, channels, duration))
     audio_thread.start()
-    while True:
-        out.write(frame)
-        current_time = time.time()
-        if (current_time - start_time) >= 30:
-            break
+    
+    time.sleep(30)
     out.release()
     audio_thread.join()
     video = mp.VideoFileClip(video_filename)

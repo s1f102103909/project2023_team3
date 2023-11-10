@@ -18,9 +18,6 @@ import soundfile as sf
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']='glossy-aloe-396205-d7fdd774bdbe.json'
 
-API_KEY_INIAD = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
-API_BASE = "https://api.openai.iniad.org/api/v1"
-
 speech_active = False
 '''
 def generate_answer(prompt):
@@ -47,20 +44,12 @@ def generate_answer(prompt):
     vv.speak(text=answer)
     return answer
 '''
-
-#openai.api_key = API_KEY_INIAD
-#openai.api_key = API_KEY
-#openai.api_base = API_BASE
-#openai.Model.list() #OpenAIのインスタンスを生成
-
-#OpenAI.openai_api_key = API_KEY_INIAD
-#OpenAI.openai_api_key = API_KEY
-#OpenAI.openai_api_base = API_BASE
-    
-    
+ 
+'''
 template = """
             {history}
-            {input}
+            Human: {input}
+            AI: 
             """
 prompt = PromptTemplate(
         input_variables = ["history","input"],
@@ -70,8 +59,9 @@ chatgpt_chain = LLMChain(
     llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
     prompt=prompt,
     verbose=True,
-    memory=ConversationBufferWindowMemory(k=10),
+    memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
 )
+
 
 def langchain_GPT(text):
     output = chatgpt_chain.predict(input=text)
@@ -79,7 +69,9 @@ def langchain_GPT(text):
     vv = Voicevox()
     vv.speak(text=output)
     return output
-    
+'''
+        
+
 class Voicevox:
     def __init__(self,host="127.0.0.1",port=50021):
         self.host = host
