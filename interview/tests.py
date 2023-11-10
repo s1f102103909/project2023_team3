@@ -19,58 +19,6 @@ import soundfile as sf
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']='glossy-aloe-396205-d7fdd774bdbe.json'
 
 speech_active = False
-'''
-def generate_answer(prompt):
-    openai.api_key = API_KEY
-    openai.api_base = API_BASE
-    openai.Model.list() #OpenAIのインスタンスを生成
-    
-    global speech_active
-    speech_active = True
-
-    response = openai.ChatCompletion.create(
-        model = "gpt-3.5-turbo",
-        messages = [
-            {'role':'user', 'content':prompt}
-        ],
-        temperature = 0,
-        max_tokens = 1024,
-        top_p = 1,
-        frequency_penalty=0,
-        presence_penalty=0
-    )
-    answer = response['choices'][0]['message']['content'].replace('面接官:', '')
-    vv=Voicevox()
-    vv.speak(text=answer)
-    return answer
-'''
- 
-'''
-template = """
-            {history}
-            Human: {input}
-            AI: 
-            """
-prompt = PromptTemplate(
-        input_variables = ["history","input"],
-        template = template
-)
-chatgpt_chain = LLMChain(
-    llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
-    prompt=prompt,
-    verbose=True,
-    memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
-)
-
-
-def langchain_GPT(text):
-    output = chatgpt_chain.predict(input=text)
-    output = output.replace('面接官', '')
-    vv = Voicevox()
-    vv.speak(text=output)
-    return output
-'''
-        
 
 class Voicevox:
     def __init__(self,host="127.0.0.1",port=50021):
