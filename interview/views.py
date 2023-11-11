@@ -19,6 +19,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferWindowMemory
 from .tests import Voicevox
+from deepface import DeepFace
 
 # Create your views here.
 # global変数
@@ -173,6 +174,8 @@ def generate_frame():
 
         # フレームを動画ファイルに書き込む 
         out.write(frame)
+        result = DeepFace.analyze(frame, actions=['emotion'])
+        print(result['dominant_emotion'])
 
 
 

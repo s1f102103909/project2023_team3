@@ -2,17 +2,11 @@ from django.test import TestCase
 
 # Create your tests here.
 import os
-import openai
 import pyaudio
 import wave
-import numpy as np
 import time
 import requests, json
 import io
-from langchain.llms.openai import OpenAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain.memory import ConversationBufferWindowMemory
 import sounddevice as sd
 import soundfile as sf
 
