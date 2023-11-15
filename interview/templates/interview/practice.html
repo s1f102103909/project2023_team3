@@ -15,50 +15,51 @@
   <main>
     <button type="button" class="btn">回答開始</button>
     <button type="button" class="stop">練習終了（無視）</button>
-    <div class="output"></div>
+    <div id="output"></div>
     <div class="output-container"></div>
     <div class="response-container"></div>
   </main>
   <script>
-    const recognition = new webkitSpeechRecognition();
-    recognition.lang = "ja";
+
+    const output = document.querySelector("#output");
+
+    SpeechRecognition = webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = "ja-JP";
     recognition.interimResults = true;
     recognition.continuous = true;
     let isListening = false;
-    let timeoutIdRecognition; // 5秒のタイムアウト用のタイマーID
-    let timeoutIdTextSend; // テキスト送信のタイムアウト用のタイマーID
-    //let recognitionButton = true;
+
+  
 
     recognition.onresult = (event) => {
+      let interimTranscript = ""; // 暫定(灰色)の認識結果
+      let finalTranscript = ""; //確定した(黒の)認識結果
       for (let i = event.resultIndex; i < event.results.length; i++) {
+        let transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          clearTimeout(timeoutIdRecognition); // 音声が検出されたらタイムアウトタイマーをクリア
-          let transcript = event.results[i][0].transcript;
-          const output = document.querySelector(".output");
-          output.textContent = transcript;
+          finalTranscript += transcript;
+        } else {
+          interimTranscript = transcript;
         }
       }
-      
-    };
+      output.innerHTML = finalTranscript + '<i style="color:#ddd;">' + interimTranscript + '</i>';
+  };
+
     const startStopButton = document.querySelector(".btn");
     startStopButton.addEventListener("click", () => {
       if (isListening) {
         // 音声認識を停止
         recognition.stop();
-        isListening = false;
         startStopButton.textContent = "回答開始";
+        isListening = false;
       } else {
         // 音声認識を開始
         recognition.start();
-        isListening = true;
         startStopButton.textContent = "回答完了";
+        isListening = true;
       }
     });
-    //全体停止用関数
-    //const stopRecognitionButton = () => {
-    //  stopRecognition();
-    //  recognitionButton = false;
-    //};
 
     const sendText = (transcript) => {
         // CSRF Tokenを取得
@@ -82,21 +83,13 @@
       };
 
     recognition.onend = () => {
-      const transcript = document.querySelector(".output").textContent;
+      const transcript = document.querySelector("#output").textContent;
       const outputcontainer = document.querySelector(".output-container");
       const response = document.createElement("div");
       response.textContent = transcript;
       outputcontainer.appendChild(response);
       sendText(transcript);
     };
-
-    //練習全体を停止する
-    const StopButton = document.querySelector(".stop");
-    StopButton.addEventListener("click", () => {
-      stopRecognitionButton();
-    });
-
-
   </script>
 </body>
 </html>

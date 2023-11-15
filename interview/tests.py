@@ -18,7 +18,7 @@ import deepl
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS']='glossy-aloe-396205-d7fdd774bdbe.json'
 
-API_KEY_INIAD = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
+API_KEY_INIAD = os.environ.get('OPENAI_API_KEY')
 API_BASE = "https://api.openai.iniad.org/api/v1"
 
 speech_active = False
@@ -75,10 +75,12 @@ chatgpt_chain = LLMChain(
 
 def langchain_GPT(text):
     output = chatgpt_chain.predict(input=text)
-    output = output.replace('面接官:', '')
+    output = output.replace('AI:', '')
+    output = output.replace('Human:', '')
+    jp_output = EN_To_JP(output)
     vv = Voicevox()
-    vv.speak(text=output)
-    return output
+    vv.speak(text=jp_output)
+    return jp_output
     
 class Voicevox:
     def __init__(self,host="127.0.0.1",port=50021):
@@ -136,19 +138,19 @@ def JP_To_EN(text):
     sourse_lang = 'JA'
     traget_lang = 'EN-US' # EN-GB
 
-    translator = deepl.Translator('API-KEY')
+    translator = deepl.Translator('915e4495-52d5-1b86-a1f3-0d620ac62c20:fx')
 
     result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
     
-    return result
+    return str(result)
 
     #英語を日本語に翻訳
 def EN_To_JP(text):
     sourse_lang = 'EN'
     traget_lang = 'JA'
 
-    translator = deepl.Translator('API-KEY')
+    translator = deepl.Translator('915e4495-52d5-1b86-a1f3-0d620ac62c20:fx')
 
     result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
     
-    return result
+    return str(result)
