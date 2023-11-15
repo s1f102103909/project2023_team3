@@ -32,7 +32,7 @@ height = 0
 out = cv2.VideoWriter()
 
 audio_filename = 'output_audio.mp3'
-#rec_flag = False
+rec_flag = False
 
 
 def langchain_GPT(text):
@@ -47,7 +47,8 @@ def home(request):
 
 @csrf_exempt
 def interview_practice(request):
-    global chatgpt_chain
+    global chatgpt_chain, rec_flag
+    rec_flag = False
     chat_results = ""
     start_recording_thread = threading.Thread(target=start_recording)
 
@@ -172,26 +173,31 @@ def result(request):
     return render(request, 'interview/result.html', {}) 
 
 def start_recording():
-    global out, width, height, fps, rec_flag
+    global out, width, height, fps
 
     # ファイル名、コーデック、フレームレート、フレームサイズを設定
     out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))
     rec_start()
 
 def rec_start():
-    global p
-    cmd = "rec -q output_audio.mp3"
-    p = subprocess.Popen(cmd.split())
+    global p, rec_flag
+    if rec_flag == False:
+        cmd = "rec -q output_audio.mp3"
+        p = subprocess.Popen(cmd.split())
+        rec_flag = True
     print("OK")
     return None
 
 def rec_stop():
-    global p
-    p.terminate()
-    try:
-        p.wait(timeout=1)
-    except subprocess.TimeoutExpired:
-        p.kill()
+    global p, rec_flag
+    if rec_flag == True:
+        p.terminate()
+        try:
+            p.wait(timeout=1)
+            rec_flag = False
+        except subprocess.TimeoutExpired:
+            p.kill()
+            rec_flag = False
     print("OK")
     out.release()
     video = mp.VideoFileClip(video_filename)
