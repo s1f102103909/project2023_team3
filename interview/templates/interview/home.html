@@ -1,9 +1,14 @@
+{% load static %} 
 <!DOCTYPE html>
 <html lang="ja">
  <head>
   <meta charset="utf-8">
   <title>Home</title>
-  <link rel="stylesheet" href="../css/base.css">
+  <script src="https://code.jquery.com/jquery-2.1.3.min.js" integrity="sha256-ivk71nXhz9nsyFDoYoGf2sbjrR9ddh+XDkCcfZxjvcM=" crossorigin="anonymous"></script>
+  <script src="{% static 'interview/js/base.js' %}"></script>
+  <link href="{% static 'interview/css/base.css' %}" rel="stylesheet">
+  
+
  </head>
   <body>
     <h1 class="emph">Home</h1>
@@ -11,11 +16,31 @@
     {% if user.is_authenticated %}
     <p>Hi {{ user.username }}!</p>
     <a href="{% url 'logout' %}">logout</a>
-    <div class="tab-003">
+    <div class="tabs">
+      <div class="tab-buttons">
+        <span class="content1">面接練習</span>
+        <span class="content2">スコア確認</span>
+        <span class="content3">Button 3</span>
+        <div id="lamp" class="content1"></div>
+      </div>
+      <div class="tab-content">
+        
+        <div class="content1">This is the content of 1 container.This will be open when button 1 is clicked.This is the content of 1 container.This will be open when button 1 is clicked.This is the content of 1 container.This will be open when button 1 is clicked.</div>
+        
+        <div class="content2">This is the content of 2 container.This will be open when button 2 is clicked.This is the content of 2 container.This will be open when button 2 is clicked.This is the content of 2 container.This will be open when button 2 is clicked.</div>
+        
+        <div class="content3">This is the content of 3 container.This will be open when button 3 is clicked.This is the content of 3 container.This will be open when button 3 is clicked.This is the content of 3 container.This will be open when button 3 is clicked.</div>
+        
+      </div>
+    </div>
+    <div class="credit">
+      
+    </div>
+    <!--<div class="tab-003">
       <label>
         <input type="radio" name="tab-003" checked>
         面接練習
-        <!--<a href="{% url 'practice' %}">面接練習</a>-->
+        <a href="{% url 'practice' %}">面接練習</a>
       </label>
       <div>
         面接オプション
@@ -23,13 +48,13 @@
 
       <label>
         <input type="radio" name="tab-003">
-        <!--<a href="{% url 'score'%}" >スコア確認</a>-->
+        <a href="{% url 'score'%}" >スコア確認</a>
         スコア確認
       </label>
       <div>
         スコア
       </div>
-    </div>
+    </div>-->
     {% else %}
     <p>You are not logged in.</p>
     <p><a href="{% url 'login' %}">login</a></p>
