@@ -9,21 +9,19 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.views.decorators import gzip
-import time
 import cv2
 import threading
 import moviepy.editor as mp
-from .tests import audio_capure
 from langchain.llms.openai import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferWindowMemory
 from .tests import Voicevox
-from deepface import DeepFace
+import subprocess
 
 # Create your views here.
 # global変数
-API_KEY_INIAD = "L3B2f43w_ROMwNtUO52-UFowQ1WfVgjWpOB-erlUg07x_OSgVSB7nbSxY1AtKG7FKTrypUmSqgUiLzOy9cIV73g"
+API_KEY_INIAD = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
 
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
@@ -34,8 +32,7 @@ height = 0
 out = cv2.VideoWriter()
 
 audio_filename = 'output_audio.mp3'
-channels = 1 # ステレオ
-duration = 30
+#rec_flag = False
 
 
 def langchain_GPT(text):
@@ -74,8 +71,6 @@ def interview_practice(request):
         # ChatGPTボタン押下時
         form = ChatForm(request.POST)
         start_recording_thread.start()
-        #if form.is_valid():
-        #prompt = form.cleaned_data['prompt']
         prompt = """
         あなたには今から新卒面接の面接官役になってもらいこちらの面接の練習をしてもらいます。以下を気を付けてください。
             ・最初は名前と学校名を聞いてください
@@ -140,19 +135,16 @@ def process_text(request):
     
 # ストリーミング画像を定期的に返却するview
 @gzip.gzip_page
-#@require_POST
 def camera_stream(request):
-    #if request.method == "POST":
-        return StreamingHttpResponse(generate_frame(), content_type='multipart/x-mixed-replace; boundary=frame')
-
-
+    return StreamingHttpResponse(generate_frame(), content_type='multipart/x-mixed-replace; boundary=frame')
 
 # フレーム生成・返却する処理
 def generate_frame():
-    global frame, width, height, fps
+    global frame, width, height, fps, out
     capture = cv2.VideoCapture(0)
     width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    capture.set(cv2.CAP_PROP_FPS, 30)
     fps = capture.get(cv2.CAP_PROP_FPS)
 
     while True:
@@ -174,26 +166,37 @@ def generate_frame():
 
         # フレームを動画ファイルに書き込む 
         out.write(frame)
-        result = DeepFace.analyze(frame, actions=['emotion'])
-        print(result['dominant_emotion'])
-
-
 
 def result(request):
+    rec_stop()
     return render(request, 'interview/result.html', {}) 
 
 def start_recording():
-    global out, width, height, fps
-    out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))  # ファイル名、コーデック、フレームレート、フレームサイズを設定
-    audio_thread = threading.Thread(target=audio_capure, args=(audio_filename, channels, duration))
-    audio_thread.start()
-    
-    time.sleep(30)
+    global out, width, height, fps, rec_flag
+
+    # ファイル名、コーデック、フレームレート、フレームサイズを設定
+    out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))
+    rec_start()
+
+def rec_start():
+    global p
+    cmd = "rec -q output_audio.mp3"
+    p = subprocess.Popen(cmd.split())
+    print("OK")
+    return None
+
+def rec_stop():
+    global p
+    p.terminate()
+    try:
+        p.wait(timeout=1)
+    except subprocess.TimeoutExpired:
+        p.kill()
+    print("OK")
     out.release()
-    audio_thread.join()
     video = mp.VideoFileClip(video_filename)
     video = video.set_audio(mp.AudioFileClip(audio_filename))
     video.write_videofile("main.mp4")
-    #user.video = 'output.mp4'
-    #user.save()
+    return None
+
         
