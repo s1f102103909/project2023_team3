@@ -22,6 +22,7 @@ class UserInformation(models.Model):
 
     def __str__(self):
         return str(self.Name)
+    
 
 def user_created(sender, instance, created, **kwargs):
     if created:
