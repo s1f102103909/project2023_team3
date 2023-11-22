@@ -1,15 +1,17 @@
-{% load static %} 
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
- <head>
-  <meta charset="utf-8">
-  <title>Home</title>
-  <script src="https://code.jquery.com/jquery-2.1.3.min.js" integrity="sha256-ivk71nXhz9nsyFDoYoGf2sbjrR9ddh+XDkCcfZxjvcM=" crossorigin="anonymous"></script>
-  <script src="{% static 'interview/js/base.js' %}"></script>
-  <link href="{% static 'interview/css/base.css' %}" rel="stylesheet">
-  
-
- </head>
+  <head>
+    <meta charset="utf-8" />
+    <title>Home</title>
+    <script
+      src="https://code.jquery.com/jquery-2.1.3.min.js"
+      integrity="sha256-ivk71nXhz9nsyFDoYoGf2sbjrR9ddh+XDkCcfZxjvcM="
+      crossorigin="anonymous"
+    ></script>
+    <script src="{% static 'interview/js/base.js' %}"></script>
+    <link href="{% static 'interview/css/base.css' %}" rel="stylesheet" />
+  </head>
   <body>
     <h1 class="emph">Home</h1>
 
@@ -24,18 +26,29 @@
         <div id="lamp" class="content1"></div>
       </div>
       <div class="tab-content">
-        
-        <div class="content1">This is the content of 1 container.This will be open when button 1 is clicked.This is the content of 1 container.This will be open when button 1 is clicked.This is the content of 1 container.This will be open when button 1 is clicked.</div>
-        
-        <div class="content2">This is the content of 2 container.This will be open when button 2 is clicked.This is the content of 2 container.This will be open when button 2 is clicked.This is the content of 2 container.This will be open when button 2 is clicked.</div>
-        
-        <div class="content3">This is the content of 3 container.This will be open when button 3 is clicked.This is the content of 3 container.This will be open when button 3 is clicked.This is the content of 3 container.This will be open when button 3 is clicked.</div>
-        
+        <div class="content1">
+          This is the content of 1 container.This will be open when button 1 is
+          clicked.This is the content of 1 container.This will be open when
+          button 1 is clicked.This is the content of 1 container.This will be
+          open when button 1 is clicked.
+        </div>
+
+        <div class="content2">
+          This is the content of 2 container.This will be open when button 2 is
+          clicked.This is the content of 2 container.This will be open when
+          button 2 is clicked.This is the content of 2 container.This will be
+          open when button 2 is clicked.
+        </div>
+
+        <div class="content3">
+          This is the content of 3 container.This will be open when button 3 is
+          clicked.This is the content of 3 container.This will be open when
+          button 3 is clicked.This is the content of 3 container.This will be
+          open when button 3 is clicked.
+        </div>
       </div>
     </div>
-    <div class="credit">
-      
-    </div>
+    <div class="credit"></div>
     <!--<div class="tab-003">
       <label>
         <input type="radio" name="tab-003" checked>
@@ -60,5 +73,20 @@
     <p><a href="{% url 'login' %}">login</a></p>
     <p><a href="{% url 'signup' %}">新規登録はこちら</a></p>
     {% endif %}
-</body>
+  </body>
+  <script>
+    $(".tab-content>div").hide();
+    $(".tab-content>div").first().slideDown();
+    $(".tab-buttons span").click(function () {
+      var thisclass = $(this).attr("class");
+      $("#lamp").removeClass().addClass("#lamp").addClass(thisclass);
+      $(".tab-content>div").each(function () {
+        if ($(this).hasClass(thisclass)) {
+          $(this).fadeIn(800);
+        } else {
+          $(this).hide();
+        }
+      });
+    });
+  </script>
 </html>
