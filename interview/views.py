@@ -204,5 +204,3 @@ def rec_stop():
     video = video.set_audio(mp.AudioFileClip(audio_filename))
     video.write_videofile("main.mp4")
     return None
-
-        
