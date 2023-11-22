@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, StreamingHttpResponse
 from .forms import ChatForm
@@ -18,6 +17,8 @@ from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferWindowMemory
 from .tests import Voicevox
 import subprocess
+from .tests import EN_To_JP, JP_To_EN
+import platform
 
 # Create your views here.
 # global変数
@@ -32,12 +33,13 @@ height = 0
 out = cv2.VideoWriter()
 
 audio_filename = 'output_audio.mp3'
-rec_flag = False
+#rec_flag = False
 
 
 def langchain_GPT(text):
     output = chatgpt_chain.predict(input=text)
-    output = output.replace('面接官', '')
+    #output = output.replace('AI', '')
+    output = EN_To_JP(output)
     vv = Voicevox()
     vv.speak(text=output)
     return output
@@ -47,8 +49,8 @@ def home(request):
 
 @csrf_exempt
 def interview_practice(request):
-    global chatgpt_chain, rec_flag
-    rec_flag = False
+    global chatgpt_chain #rec_flag
+    #rec_flag = False
     chat_results = ""
     start_recording_thread = threading.Thread(target=start_recording)
 
@@ -73,15 +75,16 @@ def interview_practice(request):
         form = ChatForm(request.POST)
         start_recording_thread.start()
         prompt = """
-        あなたには今から新卒面接の面接官役になってもらいこちらの面接の練習をしてもらいます。以下を気を付けてください。
-            ・最初は名前と学校名を聞いてください
-            ・IT企業の面接ということを意識しながら質問をしてください
-            ・質問は1会話に1つずつお願いします
-        ではお願いします
+        We will now conduct the interview. Please do so according to the following conditions
+        1. You will be the interviewer and I will be the interviewee.
+        2. Assume you are interviewing for a new hire at an IT company. 3.
+        3. Ask me 5 questions.
+        4. Please ask one question at a time.
+        5. At the end of the interview, signal the end and grade the interview.
         """
         response = langchain_GPT(prompt)
-        res = response.replace('面接官', '')
-        chat_results = res
+        #response = response.replace('AI', '')
+        chat_results = response
     else:
         form = ChatForm()
     template = loader.get_template('interview/practice.html')
@@ -130,7 +133,7 @@ def process_text(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
-        response = langchain_GPT(text)
+        response = langchain_GPT(JP_To_EN(text))
 
         return JsonResponse({'message': response})
     
@@ -180,25 +183,29 @@ def start_recording():
     rec_start()
 
 def rec_start():
-    global p, rec_flag
-    if rec_flag == False:
+    global p#, rec_flag
+    #if rec_flag == False:
+    if platform.system() == "Windows":
+        cmd = "sox -t output_audio.mp3"
+    else:
         cmd = "rec -q output_audio.mp3"
-        p = subprocess.Popen(cmd.split())
-        rec_flag = True
+    p = subprocess.Popen(cmd.split())
+    #rec_flag = True
     print("OK")
     return None
 
 def rec_stop():
-    global p, rec_flag
-    if rec_flag == True:
-        p.terminate()
-        try:
-            p.wait(timeout=1)
-            rec_flag = False
-        except subprocess.TimeoutExpired:
-            p.kill()
-            rec_flag = False
-    print("OK")
+    global p#, rec_flag
+    #if rec_flag == True:
+    p.terminate()
+    try:
+        p.wait(timeout=1)
+        #rec_flag = False
+        print("OK")
+    except subprocess.TimeoutExpired:
+        p.kill()
+        print("NO")
+        #rec_flag = False
     out.release()
     video = mp.VideoFileClip(video_filename)
     video = video.set_audio(mp.AudioFileClip(audio_filename))
