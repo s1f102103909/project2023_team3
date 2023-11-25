@@ -24,36 +24,27 @@ import wave
 # global変数
 API_KEY_INIAD = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
-
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
-video_filename = 'output.mp4'
-fps = 0.0
-width = 0
-height = 0
-out = cv2.VideoWriter()
+video_filename = 'output.mp4'             #動画ファイル名(音無し)
+fps = 0.0                                 #fpsの初期設定
+width = 0                                 #カメラの幅
+height = 0                                #カメラの縦
+out = cv2.VideoWriter()                   #フレームを書き込む変数の初期化
+audio_filename = 'output_audio.wav'       #音声ファイル名
+rec_sig = []                              #音声フレームを格納する変数
+rec_flag = False                          #撮影中かどうか
 
-audio_filename = 'output_audio.wav'
-rec_sig = []
-rec_flag = False
-
-
-def langchain_GPT(text):
-    output = chatgpt_chain.predict(input=text)
-    #output = output.replace('AI', '')
-    output = EN_To_JP(output)
-    vv = Voicevox()
-    vv.speak(text=output)
-    return output
-
+#home.htmlへの遷移
 def home(request):
     return render(request, 'interview/home.html', {}) 
 
+#練習開始ボタンを押した時の挙動
 @csrf_exempt
 def interview_practice(request):
     global chatgpt_chain, rec_flag
     rec_flag = False
     chat_results = ""
-    start_recording_thread = threading.Thread(target=start_recording)
+    start_recording_thread = threading.Thread(target=rec2_start)
 
     template = """
             {history}
@@ -74,9 +65,11 @@ def interview_practice(request):
     if request.method == "POST":
         # ChatGPTボタン押下時
         form = ChatForm(request.POST)
+        #撮影してないならば、撮影スタート
         if rec_flag == False:
             start_recording_thread.start()
             rec_flag = True
+        #ChatGPTに面接のお願いをする文章
         prompt = """
                 We will now be conducting interviews. Please follow the conditions below.
                 1. You will be the interviewer and I will be the interviewee.
@@ -84,6 +77,7 @@ def interview_practice(request):
                 3. Please ask me those questions one at a time.
                 4. At the end of the interview, please signal the end of the interview and grade the interview.
                 """
+        #返信をresoponseへ格納
         response = langchain_GPT(prompt)
         #response = response.replace('AI', '')
         chat_results = response
@@ -96,7 +90,7 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 
-
+#ホーム画面から成績画面の遷移
 def score(request):
     user = UserInformation.objects.get(Name=request.user.id)
     context = {
@@ -105,6 +99,7 @@ def score(request):
     }
     return render(request, 'interview/score.html', context) 
 
+#新規登録の画面
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -144,6 +139,28 @@ def process_text(request):
 def camera_stream(request):
     return StreamingHttpResponse(generate_frame(), content_type='multipart/x-mixed-replace; boundary=frame')
 
+#面接が終了し、結果画面への遷移
+def result(request):
+    global rec_flag
+    if rec_flag == True:
+        rec2_stop()
+        rec_flag = False
+        return render(request, 'interview/result.html', {}) 
+    return error(request)
+
+#何かしらエラーが発生した時に、エラー画面へ遷移
+def error(request):
+    return render(request, 'interview/error.html', {})
+
+#引数に文章を渡すと、ChatGPTから返信が来る
+def langchain_GPT(text):
+    output = chatgpt_chain.predict(input=text)
+    #output = output.replace('AI', '')
+    output = EN_To_JP(output)
+    vv = Voicevox()
+    vv.speak(text=output)
+    return output
+
 # フレーム生成・返却する処理
 def generate_frame():
     global frame, width, height, fps, out
@@ -173,23 +190,13 @@ def generate_frame():
         # フレームを動画ファイルに書き込む 
         out.write(frame)
 
-def result(request):
-    global rec_flag
-    if rec_flag == True:
-        rec2_stop()
-        rec_flag = False
-        return render(request, 'interview/result.html', {}) 
-
-def start_recording():
-    global out, width, height, fps
+#録画録音開始
+def rec2_start():
+    global stream, rec_sig, out, width, height, fps
 
     # ファイル名、コーデック、フレームレート、フレームサイズを設定
     out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))
-    rec2_start()
 
-
-def rec2_start():
-    global stream, rec_sig
     rec_sig = []
     p = pyaudio.PyAudio()
     stream = p.open(
@@ -205,6 +212,12 @@ def rec2_start():
     print("recording now...")
     return 0
 
+def callback(in_data, frame_count, time_info, status_flags):
+    global rec_sig
+    rec_sig.append(in_data)
+    return None, pyaudio.paContinue
+
+#録画録音停止
 def rec2_stop():
     #録音停止
     global stream, audio_filename, rec_sig
@@ -224,8 +237,3 @@ def rec2_stop():
     video = video.set_audio(mp.AudioFileClip(audio_filename))
     video.write_videofile("main.mp4")
     return 0
-
-def callback(in_data, frame_count, time_info, status_flags):
-    global rec_sig
-    rec_sig.append(in_data)
-    return None, pyaudio.paContinue

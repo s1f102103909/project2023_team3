@@ -11,4 +11,5 @@ urlpatterns = [
     path('check_speech_end/', views.check_speech_end, name='check_speech_end'),
     path('camera_stream', views.camera_stream, name='camera_stream'),
     path('result', views.result, name='result'),
+    path('error', views.error, name="error"),
 ]
