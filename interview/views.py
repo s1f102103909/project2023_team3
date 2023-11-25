@@ -16,9 +16,9 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferWindowMemory
 from .tests import Voicevox
-import subprocess
 from .tests import EN_To_JP, JP_To_EN
-import platform
+import pyaudio
+import wave
 
 # Create your views here.
 # global変数
@@ -32,8 +32,9 @@ width = 0
 height = 0
 out = cv2.VideoWriter()
 
-audio_filename = 'output_audio.mp3'
-#rec_flag = False
+audio_filename = 'output_audio.wav'
+rec_sig = []
+rec_flag = False
 
 
 def langchain_GPT(text):
@@ -49,8 +50,8 @@ def home(request):
 
 @csrf_exempt
 def interview_practice(request):
-    global chatgpt_chain #rec_flag
-    #rec_flag = False
+    global chatgpt_chain, rec_flag
+    rec_flag = False
     chat_results = ""
     start_recording_thread = threading.Thread(target=start_recording)
 
@@ -73,15 +74,16 @@ def interview_practice(request):
     if request.method == "POST":
         # ChatGPTボタン押下時
         form = ChatForm(request.POST)
-        start_recording_thread.start()
+        if rec_flag == False:
+            start_recording_thread.start()
+            rec_flag = True
         prompt = """
-        We will now conduct the interview. Please do so according to the following conditions
-        1. You will be the interviewer and I will be the interviewee.
-        2. Assume you are interviewing for a new hire at an IT company. 3.
-        3. Ask me 5 questions.
-        4. Please ask one question at a time.
-        5. At the end of the interview, signal the end and grade the interview.
-        """
+                We will now be conducting interviews. Please follow the conditions below.
+                1. You will be the interviewer and I will be the interviewee.
+                2. Please assume that the interview is for a new hire at an IT company.
+                3. Please ask me those questions one at a time.
+                4. At the end of the interview, please signal the end of the interview and grade the interview.
+                """
         response = langchain_GPT(prompt)
         #response = response.replace('AI', '')
         chat_results = response
@@ -172,44 +174,58 @@ def generate_frame():
         out.write(frame)
 
 def result(request):
-    rec_stop()
-    return render(request, 'interview/result.html', {}) 
+    global rec_flag
+    if rec_flag == True:
+        rec2_stop()
+        rec_flag = False
+        return render(request, 'interview/result.html', {}) 
 
 def start_recording():
     global out, width, height, fps
 
     # ファイル名、コーデック、フレームレート、フレームサイズを設定
     out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))
-    rec_start()
+    rec2_start()
 
-def rec_start():
-    global p#, rec_flag
-    #if rec_flag == False:
-    if platform.system() == "Windows":
-        cmd = "sox -t output_audio.mp3"
-    else:
-        cmd = "rec -q output_audio.mp3"
-    p = subprocess.Popen(cmd.split())
-    #rec_flag = True
-    print("OK")
-    return None
 
-def rec_stop():
-    global p#, rec_flag
-    #if rec_flag == True:
-    p.terminate()
-    try:
-        p.wait(timeout=1)
-        #rec_flag = False
-        print("OK")
-    except subprocess.TimeoutExpired:
-        p.kill()
-        print("NO")
-        #rec_flag = False
+def rec2_start():
+    global stream, rec_sig
+    rec_sig = []
+    p = pyaudio.PyAudio()
+    stream = p.open(
+        rate=44100,
+        channels=1,
+        format=pyaudio.paInt16,
+        input=True,
+        frames_per_buffer=1024,
+        input_device_index=0,
+        stream_callback=callback,
+    )
+    stream.start_stream()
+    print("recording now...")
+    return 0
+
+def rec2_stop():
+    #録音停止
+    global stream, audio_filename, rec_sig
+    if stream.is_active():
+        stream.stop_stream()
+        stream.close()
     out.release()
+    wf = wave.open(audio_filename, 'wb')
+    wf.setnchannels(1)
+    wf.setsampwidth(2)
+    wf.setframerate(44100)
+    wf.writeframes(b''.join(rec_sig))
+    wf.close()
+
+    #音声ファイルと録画ファイルの合成
     video = mp.VideoFileClip(video_filename)
     video = video.set_audio(mp.AudioFileClip(audio_filename))
     video.write_videofile("main.mp4")
-    return None
+    return 0
 
-        
+def callback(in_data, frame_count, time_info, status_flags):
+    global rec_sig
+    rec_sig.append(in_data)
+    return None, pyaudio.paContinue

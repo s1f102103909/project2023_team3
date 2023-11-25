@@ -85,4 +85,3 @@ def EN_To_JP(text):
     result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
     
     return result
-
