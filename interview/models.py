@@ -14,9 +14,9 @@ def dir_path_name(instance):
     return dir_path
 
 class UserInformation(models.Model):
-    Name = models.OneToOneField(User, on_delete=models.CASCADE)
-    Shushoku_previousScore = models.IntegerField(blank=True)
-    Shushoku_maxScore = models.IntegerField(blank=True)
+    Name = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
+    Shushoku_previousScore = models.IntegerField(blank=True, null=True)
+    Shushoku_maxScore = models.IntegerField(blank=True, null=True)
     video = models.FileField(upload_to=dir_path_name, null=True, blank=True)
     
 

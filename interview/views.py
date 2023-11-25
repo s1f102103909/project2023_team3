@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, StreamingHttpResponse
 from .forms import ChatForm
@@ -17,40 +16,35 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferWindowMemory
 from .tests import Voicevox
-import subprocess
+from .tests import EN_To_JP, JP_To_EN
+import pyaudio
+import wave
 
 # Create your views here.
 # global変数
 API_KEY_INIAD = "7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
-
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
-video_filename = 'output.mp4'
-fps = 0.0
-width = 0
-height = 0
-out = cv2.VideoWriter()
+video_filename = 'output.mp4'             #動画ファイル名(音無し)
+fps = 0.0                                 #fpsの初期設定
+width = 0                                 #カメラの幅
+height = 0                                #カメラの縦
+out = cv2.VideoWriter()                   #フレームを書き込む変数の初期化
+audio_filename = 'output_audio.wav'       #音声ファイル名
+rec_sig = []                              #音声フレームを格納する変数
+rec_flag = False                          #撮影中かどうか
 
-audio_filename = 'output_audio.mp3'
-rec_flag = False
-
-
-def langchain_GPT(text):
-    output = chatgpt_chain.predict(input=text)
-    output = output.replace('面接官', '')
-    vv = Voicevox()
-    vv.speak(text=output)
-    return output
-
+#home.htmlへの遷移
 def home(request):
     return render(request, 'interview/home.html', {}) 
 
+#練習開始ボタンを押した時の挙動
 @csrf_exempt
 def interview_practice(request):
     global chatgpt_chain, rec_flag
     rec_flag = False
     chat_results = ""
-    start_recording_thread = threading.Thread(target=start_recording)
+    start_recording_thread = threading.Thread(target=rec2_start)
 
     template = """
             {history}
@@ -71,17 +65,22 @@ def interview_practice(request):
     if request.method == "POST":
         # ChatGPTボタン押下時
         form = ChatForm(request.POST)
-        start_recording_thread.start()
+        #撮影してないならば、撮影スタート
+        if rec_flag == False:
+            start_recording_thread.start()
+            rec_flag = True
+        #ChatGPTに面接のお願いをする文章
         prompt = """
-        あなたには今から新卒面接の面接官役になってもらいこちらの面接の練習をしてもらいます。以下を気を付けてください。
-            ・最初は名前と学校名を聞いてください
-            ・IT企業の面接ということを意識しながら質問をしてください
-            ・質問は1会話に1つずつお願いします
-        ではお願いします
-        """
+                We will now be conducting interviews. Please follow the conditions below.
+                1. You will be the interviewer and I will be the interviewee.
+                2. Please assume that the interview is for a new hire at an IT company.
+                3. Please ask me those questions one at a time.
+                4. At the end of the interview, please signal the end of the interview and grade the interview.
+                """
+        #返信をresoponseへ格納
         response = langchain_GPT(prompt)
-        res = response.replace('面接官', '')
-        chat_results = res
+        #response = response.replace('AI', '')
+        chat_results = response
     else:
         form = ChatForm()
     template = loader.get_template('interview/practice.html')
@@ -91,7 +90,7 @@ def interview_practice(request):
     }
     return HttpResponse(template.render(context, request))
 
-
+#ホーム画面から成績画面の遷移
 def score(request):
     user = UserInformation.objects.get(Name=request.user.id)
     context = {
@@ -100,6 +99,7 @@ def score(request):
     }
     return render(request, 'interview/score.html', context) 
 
+#新規登録の画面
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -130,7 +130,7 @@ def process_text(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
-        response = langchain_GPT(text)
+        response = langchain_GPT(JP_To_EN(text))
 
         return JsonResponse({'message': response})
     
@@ -138,6 +138,28 @@ def process_text(request):
 @gzip.gzip_page
 def camera_stream(request):
     return StreamingHttpResponse(generate_frame(), content_type='multipart/x-mixed-replace; boundary=frame')
+
+#面接が終了し、結果画面への遷移
+def result(request):
+    global rec_flag
+    if rec_flag == True:
+        rec2_stop()
+        rec_flag = False
+        return render(request, 'interview/result.html', {}) 
+    return error(request)
+
+#何かしらエラーが発生した時に、エラー画面へ遷移
+def error(request):
+    return render(request, 'interview/error.html', {})
+
+#引数に文章を渡すと、ChatGPTから返信が来る
+def langchain_GPT(text):
+    output = chatgpt_chain.predict(input=text)
+    #output = output.replace('AI', '')
+    output = EN_To_JP(output)
+    vv = Voicevox()
+    vv.speak(text=output)
+    return output
 
 # フレーム生成・返却する処理
 def generate_frame():
@@ -168,39 +190,50 @@ def generate_frame():
         # フレームを動画ファイルに書き込む 
         out.write(frame)
 
-def result(request):
-    rec_stop()
-    return render(request, 'interview/result.html', {}) 
-
-def start_recording():
-    global out, width, height, fps
+#録画録音開始
+def rec2_start():
+    global stream, rec_sig, out, width, height, fps
 
     # ファイル名、コーデック、フレームレート、フレームサイズを設定
     out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))
-    rec_start()
 
-def rec_start():
-    global p, rec_flag
-    if rec_flag == False:
-        cmd = "rec -q output_audio.mp3"
-        p = subprocess.Popen(cmd.split())
-        rec_flag = True
-    print("OK")
-    return None
+    rec_sig = []
+    p = pyaudio.PyAudio()
+    stream = p.open(
+        rate=44100,
+        channels=1,
+        format=pyaudio.paInt16,
+        input=True,
+        frames_per_buffer=1024,
+        input_device_index=0,
+        stream_callback=callback,
+    )
+    stream.start_stream()
+    print("recording now...")
+    return 0
 
-def rec_stop():
-    global p, rec_flag
-    if rec_flag == True:
-        p.terminate()
-        try:
-            p.wait(timeout=1)
-            rec_flag = False
-        except subprocess.TimeoutExpired:
-            p.kill()
-            rec_flag = False
-    print("OK")
+def callback(in_data, frame_count, time_info, status_flags):
+    global rec_sig
+    rec_sig.append(in_data)
+    return None, pyaudio.paContinue
+
+#録画録音停止
+def rec2_stop():
+    #録音停止
+    global stream, audio_filename, rec_sig
+    if stream.is_active():
+        stream.stop_stream()
+        stream.close()
     out.release()
+    wf = wave.open(audio_filename, 'wb')
+    wf.setnchannels(1)
+    wf.setsampwidth(2)
+    wf.setframerate(44100)
+    wf.writeframes(b''.join(rec_sig))
+    wf.close()
+
+    #音声ファイルと録画ファイルの合成
     video = mp.VideoFileClip(video_filename)
     video = video.set_audio(mp.AudioFileClip(audio_filename))
     video.write_videofile("main.mp4")
-    return None
+    return 0

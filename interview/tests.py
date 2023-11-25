@@ -63,13 +63,13 @@ class Voicevox:
             stream.stop_stream()
             stream.close()
             p.terminate()
-            
+
     #日本語を英語に翻訳
 def JP_To_EN(text):
     sourse_lang = 'JA'
     traget_lang = 'EN-US' # EN-GB
 
-    translator = deepl.Translator('API-KEY')
+    translator = deepl.Translator('915e4495-52d5-1b86-a1f3-0d620ac62c20:fx')
 
     result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
     
@@ -80,9 +80,8 @@ def EN_To_JP(text):
     sourse_lang = 'EN'
     traget_lang = 'JA'
 
-    translator = deepl.Translator('API-KEY')
+    translator = deepl.Translator('915e4495-52d5-1b86-a1f3-0d620ac62c20:fx')
 
     result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
     
     return result
-
