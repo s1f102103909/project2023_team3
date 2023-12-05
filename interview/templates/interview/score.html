@@ -11,5 +11,13 @@
     
     <p>前回のスコア : {{ previous_score}}</p>
 
+    {% if user.video is true %}
+    <p>前回のビデオ</p>
+    <video controls width="600" height="400">
+      <source src="{{ video.url }}" type="{{ video.content_type }}">
+    </video>
+    {% else %}
+    <p>Not found video</p>
+    {% endif %}
   </body>
 </html>
