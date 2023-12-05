@@ -19,6 +19,8 @@ from .tests import Voicevox
 from .tests import EN_To_JP, JP_To_EN
 import pyaudio
 import wave
+from django.core.files import File
+import os
 
 # Create your views here.
 # global変数
@@ -95,7 +97,8 @@ def score(request):
     user = UserInformation.objects.get(Name=request.user.id)
     context = {
         "max_score" : user.Shushoku_maxScore,
-        "previous_score" : user.Shushoku_previousScore
+        "previous_score" : user.Shushoku_previousScore,
+        "video" : user.video
     }
     return render(request, 'interview/score.html', context) 
 
@@ -142,9 +145,13 @@ def camera_stream(request):
 #面接が終了し、結果画面への遷移
 def result(request):
     global rec_flag
+    user = UserInformation.objects.get(Name=request.user.id)
     if rec_flag == True:
         rec2_stop()
         rec_flag = False
+
+        with open("main.mp4", "rb") as video_file:
+            user.video.save(os.path.basename("") ,File(video_file), save=True)
         return render(request, 'interview/result.html', {}) 
     return error(request)
 

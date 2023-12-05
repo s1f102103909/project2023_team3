@@ -6,11 +6,11 @@ import os
 
 # Create your models here.
 
-def dir_path_name(instance):
+def dir_path_name(instance, filename):
     date_time = datetime.datetime.now() # 現在の時刻を取得
     date_dir = date_time.strftime('%Y年/%m月/%d日') # 年/月/日のフォーマット作成
-    time_stamp = date_time.strftime('%H時%M分') #時分のフォーマットの作成
-    dir_path = os.path.join(date_dir, time_stamp)
+    time_stamp = date_time.strftime('%H時%M分.mp4') #時分のフォーマットの作成
+    dir_path = os.path.join('video', date_dir, time_stamp)
     return dir_path
 
 class UserInformation(models.Model):
@@ -19,7 +19,6 @@ class UserInformation(models.Model):
     Shushoku_maxScore = models.IntegerField(blank=True, null=True)
     video = models.FileField(upload_to=dir_path_name, null=True, blank=True)
     
-
     def __str__(self):
         return str(self.Name)
     
