@@ -14,11 +14,6 @@
   <body>
     <header>LOGO</header>
     <div class="flex">
-      <form method="POST">{% csrf_token %}</form>
-      {{ chat_results }}
-      <br />
-      <br />
-
       <img
         id="video"
         src="{% url 'camera_stream' %}"
@@ -26,8 +21,14 @@
         height="500"
       />
       <br />
-      <main>
+      <form method="POST">
+        {% csrf_token %}
         <button type="submit" class="practice">練習開始</button>
+      </form>
+      {{ chat_results }}
+      <br />
+      <br />
+      <main>
         <button type="button" class="btn">回答開始</button>
         <br />
         <button onclick="location.href='/result'">結果画面へ</button>
