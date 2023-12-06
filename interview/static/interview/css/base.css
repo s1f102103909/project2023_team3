@@ -47,7 +47,6 @@ svg {
   line-height: 0px;
 }
 .tab-content {
-  border-bottom: 3px solid #ddd;
   padding: 3px;
   background: white;
   display: inline-block;
@@ -70,6 +69,20 @@ span {
 
 span div {
   top: 0;
+}
+
+.con1-2 {
+  text-align: center;
+  width: 100%;
+}
+.content1 h2 {
+  margin-left: 80%;
+  width: 400px;
+  text-align: center;
+  font-size: 40px;
+  color: #fff;
+  background-color: rgb(2, 2, 88);
+  border-radius: 0px 20px 20px 0px;
 }
 #lamp {
   width: 20%;
