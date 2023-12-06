@@ -21,6 +21,7 @@ import pyaudio
 import wave
 from django.core.files import File
 import os
+import time
 
 # Create your views here.
 # global変数
@@ -36,6 +37,9 @@ audio_filename = 'output_audio.wav'       #音声ファイル名
 rec_sig = []                              #音声フレームを格納する変数
 rec_flag = False                          #撮影中かどうか
 
+start_time = 0.0
+end_time = 0.0
+
 #home.htmlへの遷移
 def home(request):
     return render(request, 'interview/home.html', {}) 
@@ -43,7 +47,7 @@ def home(request):
 #練習開始ボタンを押した時の挙動
 @csrf_exempt
 def interview_practice(request):
-    global chatgpt_chain, rec_flag
+    global chatgpt_chain, rec_flag, start_time
     rec_flag = False
     chat_results = ""
     start_recording_thread = threading.Thread(target=rec2_start)
@@ -70,6 +74,7 @@ def interview_practice(request):
         #撮影してないならば、撮影スタート
         if rec_flag == False:
             start_recording_thread.start()
+            start_time = time.time()
             rec_flag = True
         #ChatGPTに面接のお願いをする文章
         prompt = """
@@ -144,9 +149,10 @@ def camera_stream(request):
 
 #面接が終了し、結果画面への遷移
 def result(request):
-    global rec_flag
+    global rec_flag, end_time
     user = UserInformation.objects.get(Name=request.user.id)
     if rec_flag == True:
+        end_time = time.time()
         rec2_stop()
         rec_flag = False
 
