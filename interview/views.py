@@ -21,6 +21,7 @@ import pyaudio
 import wave
 from django.core.files import File
 import os
+import openai
 
 # Create your views here.
 # global変数
@@ -36,6 +37,9 @@ audio_filename = 'output_audio.wav'       #音声ファイル名
 rec_sig = []                              #音声フレームを格納する変数
 rec_flag = False                          #撮影中かどうか
 
+speechTexts = [] # 音声合成したテキストを格納する変数
+responseTexts = [] # 返答テキストを格納する変数
+
 #home.htmlへの遷移
 def home(request):
     return render(request, 'interview/home.html', {}) 
@@ -46,7 +50,7 @@ def interview_practice(request):
     global chatgpt_chain, rec_flag
     rec_flag = False
     chat_results = ""
-    start_recording_thread = threading.Thread(target=rec2_start)
+    #start_recording_thread = threading.Thread(target=rec2_start)
 
     template = """
             {history}
@@ -69,7 +73,7 @@ def interview_practice(request):
         form = ChatForm(request.POST)
         #撮影してないならば、撮影スタート
         if rec_flag == False:
-            start_recording_thread.start()
+            #start_recording_thread.start()
             rec_flag = True
         #ChatGPTに面接のお願いをする文章
         prompt = """
@@ -83,6 +87,7 @@ def interview_practice(request):
         response = langchain_GPT(prompt)
         #response = response.replace('AI', '')
         chat_results = response
+        responseTexts.append("面接官:{0}".format(response))
     else:
         form = ChatForm()
     template = loader.get_template('interview/practice.html')
@@ -122,6 +127,7 @@ def process_text(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
+        speechTexts.append("あなた:{0}".format(text))
         response = langchain_GPT(JP_To_EN(text))
 
         return JsonResponse({'message': response})
@@ -136,13 +142,16 @@ def result(request):
     global rec_flag
     user = UserInformation.objects.get(Name=request.user.id)
     if rec_flag == True:
-        rec2_stop()
+        #rec2_stop()
         rec_flag = False
 
-        with open("main.mp4", "rb") as video_file:
-            user.video.save(os.path.basename("") ,File(video_file), save=True)
-        return render(request, 'interview/result.html', {}) 
-    return error(request)
+        point = ChatGPT_to_Point(speechTexts,responseTexts)
+        point = EN_To_JP(point)
+        context = {'point': point}
+
+        #with open("main.mp4", "rb") as video_file:
+        #    user.video.save(os.path.basename("") ,File(video_file), save=True)
+        return render(request, 'interview/result.html',context)
 
 #何かしらエラーが発生した時に、エラー画面へ遷移
 def error(request):
@@ -153,6 +162,7 @@ def langchain_GPT(text):
     output = chatgpt_chain.predict(input=text)
     #output = output.replace('AI', '')
     output = EN_To_JP(output)
+    responseTexts.append("面接官:{0}".format(output))
     vv = Voicevox()
     vv.speak(text=output)
     return output
@@ -233,3 +243,29 @@ def rec2_stop():
     video = video.set_audio(mp.AudioFileClip(audio_filename))
     video.write_videofile("main.mp4")
     return 0
+
+def ChatGPT_to_Point(speechTexts,responseTexts):
+    history = ""
+    for i in range(len(speechTexts)):
+        history += "{0}\n".format(responseTexts[i])
+        history += "{0}\n".format(speechTexts[i])
+    openai.api_key = API_KEY_INIAD
+    openai.api_base= API_BASE
+    response = openai.ChatCompletion.create(
+        model = "gpt-3.5-turbo",
+        messages = [
+            {"role":"system",
+             "content":"""
+                    You are an interview critic. Please evaluate the interview dialogue history you received and provide a 70-word evaluation.
+                    Also, please give a score out of 100. Please grade them strictly.
+                    Your output should be in the following form.
+                    ------
+                    Score : Actual score
+                    Evaluation : Actual evaluation
+                    ------
+                    """},
+            {"role":"user",
+             "content":history}
+        ]
+    )
+    return response.choices[0]['message']['content']
