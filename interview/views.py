@@ -119,17 +119,6 @@ def check_speech_end(request):
 @csrf_exempt
 def process_text(request):
     if request.method == 'POST':
-        #text = request.POST.get('text')
-        # テキストの処理を実行
-        # ...
-        # 応答を返す
-
-        # 処理されたテキストをセッションに保存
-        #request.session['processed_text'] = text
-        
-        #return JsonResponse({'message': text })
-    #else:
-        #return JsonResponse({'message': 'Invalid request method'})
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
