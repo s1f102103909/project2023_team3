@@ -24,7 +24,7 @@ import os
 
 # Create your views here.
 # global変数
-API_KEY_INIAD =os.environ.get('OPENAI_API_KEY')
+API_KEY_INIAD ="ehoIeOxmC5m1SAEwGLysEqLy5QIh0XwWLp3zIlBAcy4dcsi2BhH_L_fo8lQVK27HxijRfbqqEHgqeWTOiReCwIQ"
 API_BASE = "https://api.openai.iniad.org/api/v1"
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
 video_filename = 'output.mp4'             #動画ファイル名(音無し)
