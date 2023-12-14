@@ -118,9 +118,6 @@ def signup(request):
         form = SignUpForm()
     return render(request, "interview/signup.html", {"form":form})
 
-def check_speech_end(request):
-    return JsonResponse({'active':recognition.is_listening()})
-
 @csrf_exempt
 def process_text(request):
     if request.method == 'POST':
