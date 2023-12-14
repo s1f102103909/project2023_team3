@@ -18,6 +18,7 @@
   <img id="video" src="{% url 'camera_stream' %}" width="810" height="500">
   <br>
   <main>
+    <button type="button" class="practice_demo">練習開始デモ</button>
     <button type="button" class="btn">回答開始</button>
     <br>
     <button onclick="location.href='/result'">結果画面へ</button>
@@ -27,6 +28,9 @@
     <div class="record"></div>
   </main>
   <script>
+    //demoボタン設定
+    const practice_demo = document.querySelector(".practice_demo");
+
     //ボタン設定
     const startStopButton = document.querySelector(".btn");
     const output = document.querySelector("#output");
@@ -101,6 +105,26 @@
       outputcontainer.appendChild(response);
       sendText(transcript);
     };
+
+    practice_demo.addEventListener("click", () => {
+      let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      let xhr = new XMLHttpRequest();
+      xhr.open("POST", "/practice_demo/", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          const responseContainer = document.querySelector(".record");
+          const response = document.createElement("div");
+          response.textContent = JSON.parse(xhr.responseText).message;
+          responseContainer.appendChild(response);
+        }
+      };
+      xhr.send(JSON.stringify({ text: finalTranscript })); //適当のテキストを送信
+      //practice_demo.style.display = "none";  // 練習開始デモボタンを非表示に
+      practice_demo.disabled = true;  // 練習開始デモボタンを無効化
+    });
 
   </script>
 </body>

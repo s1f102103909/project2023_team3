@@ -12,4 +12,5 @@ urlpatterns = [
     path('camera_stream', views.camera_stream, name='camera_stream'),
     path('result', views.result, name='result'),
     path('error', views.error, name="error"),
+    path('practice_demo/',views.practice_demo,name='practice_demo'),
 ]

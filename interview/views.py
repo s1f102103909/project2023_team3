@@ -142,16 +142,18 @@ def result(request):
     global rec_flag
     user = UserInformation.objects.get(Name=request.user.id)
     if rec_flag == True:
-        #rec2_stop()
+        rec2_stop()
         rec_flag = False
 
         point = ChatGPT_to_Point(speechTexts,responseTexts)
         point = EN_To_JP(point)
         context = {'point': point}
 
-        #with open("main.mp4", "rb") as video_file:
-        #    user.video.save(os.path.basename("") ,File(video_file), save=True)
+        with open("main.mp4", "rb") as video_file:
+            user.video.save(os.path.basename("") ,File(video_file), save=True)
         return render(request, 'interview/result.html',context)
+    else:
+        return render(request, 'interview/result.html',{})
 
 #何かしらエラーが発生した時に、エラー画面へ遷移
 def error(request):
@@ -269,3 +271,44 @@ def ChatGPT_to_Point(speechTexts,responseTexts):
         ]
     )
     return response.choices[0]['message']['content']
+
+@csrf_exempt
+def practice_demo(request):
+    global chatgpt_chain, rec_flag
+    rec_flag = False
+    chat_results = ""
+    start_recording_thread = threading.Thread(target=rec2_start)
+
+    template = """
+            {history}
+            Human: {input}
+            AI: 
+            """
+    prompt = PromptTemplate(
+        input_variables = ["history","input"],
+        template = template
+    )   
+    chatgpt_chain = LLMChain(
+        llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
+        prompt=prompt,
+        verbose=True,
+        memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
+    )
+    if request.method == 'POST':
+        #撮影してないならば、撮影スタート
+        if rec_flag == False:
+            start_recording_thread.start()
+            rec_flag = True
+        #ChatGPTに面接のお願いをする文章
+        prompt = """
+                We will now be conducting interviews. Please follow the conditions below.
+                1. You will be the interviewer and I will be the interviewee.
+                2. Please assume that the interview is for a new hire at an IT company.
+                3. Please ask me those questions one at a time.
+                4. At the end of the interview, please signal the end of the interview and grade the interview.
+                """
+        #返信をresoponseへ格納
+        response = langchain_GPT(prompt)
+        responseTexts.append("面接官:{0}".format(response))
+    
+    return JsonResponse({'message': response})
