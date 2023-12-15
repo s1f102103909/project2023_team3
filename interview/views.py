@@ -57,7 +57,7 @@ def home(request):
 #練習開始ボタンを押した時の挙動
 @csrf_exempt
 def interview_practice(request):
-    global chatgpt_chain, rec_flag
+    global chatgpt_chain, rec_flag, start_time
     rec_flag = False
     start_recording_thread = threading.Thread(target=rec2_start)
     if request.method == "GET":
@@ -82,6 +82,7 @@ def interview_practice(request):
         #撮影してないならば、撮影スタート
         if rec_flag == False:
             start_recording_thread.start()
+            start_time = time.time()    #撮影開始時刻
             rec_flag = True
         #ChatGPTに面接のお願いをする文章
         prompt = """
@@ -165,6 +166,7 @@ def langchain_GPT(text):
     responseTexts.append("面接官:{0}".format(output))
     vv = Voicevox()
     vv.speak(text=output)
+    voicebox_end_time.append(time.time())   #VoiceBoxが喋り終わった時間
     return output
 
 # フレーム生成・返却する処理
@@ -272,6 +274,7 @@ def ChatGPT_to_Point(speechTexts,responseTexts):
 
 #ユーザーの音声だけを抜き取る
 def sound_cut():
+    global start_time, user_end_time, voicebox_end_time
     if os.path.isdir(audio_dir):
         shutil.rmtree(audio_dir)
     os.makedirs("cutaudio")
