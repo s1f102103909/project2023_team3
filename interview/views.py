@@ -1,7 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, StreamingHttpResponse
-from .forms import ChatForm
-from django.template import loader
+from django.http import StreamingHttpResponse
 from .models import UserInformation
 from .forms import SignUpForm
 from django.http import JsonResponse
@@ -22,6 +20,10 @@ import wave
 from django.core.files import File
 import os
 import openai
+from pydub import AudioSegment
+import time
+import requests
+import glob, shutil
 
 # Create your views here.
 # global変数
@@ -40,6 +42,12 @@ rec_flag = False                          #撮影中かどうか
 speechTexts = [] # 音声合成したテキストを格納する変数
 responseTexts = [] # 返答テキストを格納する変数
 
+start_time = 0.0    #録音開始時刻の初期設定
+user_end_time = []  #ユーザーの喋り終わりの時間の配列
+voicebox_end_time = []  #VoiceBoxの喋り終わりの時間の配列
+
+audio_dir = "cutaudio"
+
 #home.htmlへの遷移
 def home(request):
     return render(request, 'interview/home.html', {}) 
@@ -47,33 +55,32 @@ def home(request):
 #練習開始ボタンを押した時の挙動
 @csrf_exempt
 def interview_practice(request):
-    global chatgpt_chain, rec_flag
+    global chatgpt_chain, rec_flag, start_time
     rec_flag = False
-    chat_results = ""
-    #start_recording_thread = threading.Thread(target=rec2_start)
+    start_recording_thread = threading.Thread(target=rec2_start)
+    if request.method == "GET":
+        template = """
+                {history}
+                Human: {input}
+                AI: 
+                """
+        prompt = PromptTemplate(
+            input_variables = ["history","input"],
+            template = template
+        )   
+        chatgpt_chain = LLMChain(
+            llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
+            prompt=prompt,
+            verbose=True,
+            memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
+        )
+        return render(request, "interview/practice.html", {})
 
-    template = """
-            {history}
-            Human: {input}
-            AI: 
-            """
-    prompt = PromptTemplate(
-        input_variables = ["history","input"],
-        template = template
-    )   
-    chatgpt_chain = LLMChain(
-        llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
-        prompt=prompt,
-        verbose=True,
-        memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
-    )
-
-    if request.method == "POST":
-        # ChatGPTボタン押下時
-        form = ChatForm(request.POST)
+    if request.method == 'POST':
         #撮影してないならば、撮影スタート
         if rec_flag == False:
-            #start_recording_thread.start()
+            start_recording_thread.start()
+            start_time = time.time()    #撮影開始時刻
             rec_flag = True
         #ChatGPTに面接のお願いをする文章
         prompt = """
@@ -85,17 +92,9 @@ def interview_practice(request):
                 """
         #返信をresoponseへ格納
         response = langchain_GPT(prompt)
-        #response = response.replace('AI', '')
-        chat_results = response
         responseTexts.append("面接官:{0}".format(response))
-    else:
-        form = ChatForm()
-    template = loader.get_template('interview/practice.html')
-    context = {
-        'form' : form, 
-        'chat_results' : chat_results
-    }
-    return HttpResponse(template.render(context, request))
+    
+        return JsonResponse({'message': response})
 
 #ホーム画面から成績画面の遷移
 def score(request):
@@ -124,6 +123,7 @@ def process_text(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
+        user_end_time.append(time.time())
         speechTexts.append("あなた:{0}".format(text))
         response = langchain_GPT(JP_To_EN(text))
 
@@ -140,6 +140,7 @@ def result(request):
     user = UserInformation.objects.get(Name=request.user.id)
     if rec_flag == True:
         rec2_stop()
+        sound_cut()
         rec_flag = False
 
         point = ChatGPT_to_Point(speechTexts,responseTexts)
@@ -164,6 +165,7 @@ def langchain_GPT(text):
     responseTexts.append("面接官:{0}".format(output))
     vv = Voicevox()
     vv.speak(text=output)
+    voicebox_end_time.append(time.time())   #VoiceBoxが喋り終わった時間
     return output
 
 # フレーム生成・返却する処理
@@ -269,43 +271,30 @@ def ChatGPT_to_Point(speechTexts,responseTexts):
     )
     return response.choices[0]['message']['content']
 
-@csrf_exempt
-def practice_demo(request):
-    global chatgpt_chain, rec_flag
-    rec_flag = False
-    chat_results = ""
-    start_recording_thread = threading.Thread(target=rec2_start)
+#ユーザーの音声だけを抜き取る
+def sound_cut():
+    global start_time, user_end_time, voicebox_end_time
+    if os.path.isdir(audio_dir):
+        shutil.rmtree(audio_dir)
+    os.makedirs("cutaudio")
+    for i in range(len(user_end_time)):
+        diff_with_voicebox = voicebox_end_time[i] - start_time
+        diff_with_user = user_end_time[i] -start_time
+        sound = AudioSegment.from_file("output_audio.wav", format="wav")
+        cutsound = sound[diff_with_voicebox*1000:diff_with_user*1000]
+        cutsound.export(f"cutaudio/score{i+1}.wav", format="wav")
 
-    template = """
-            {history}
-            Human: {input}
-            AI: 
-            """
-    prompt = PromptTemplate(
-        input_variables = ["history","input"],
-        template = template
-    )   
-    chatgpt_chain = LLMChain(
-        llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
-        prompt=prompt,
-        verbose=True,
-        memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
-    )
-    if request.method == 'POST':
-        #撮影してないならば、撮影スタート
-        if rec_flag == False:
-            start_recording_thread.start()
-            rec_flag = True
-        #ChatGPTに面接のお願いをする文章
-        prompt = """
-                We will now be conducting interviews. Please follow the conditions below.
-                1. You will be the interviewer and I will be the interviewee.
-                2. Please assume that the interview is for a new hire at an IT company.
-                3. Please ask me those questions one at a time.
-                4. At the end of the interview, please signal the end of the interview and grade the interview.
-                """
-        #返信をresoponseへ格納
-        response = langchain_GPT(prompt)
-        responseTexts.append("面接官:{0}".format(response))
-    
-    return JsonResponse({'message': response})
+#ユーザーの音声から、感情を判定
+def voice_result():
+    result = ""
+    file_pat = "{}/*.wav".format(audio_dir)
+    url = "https://ai-api.userlocal.jp/voice-emotion/basic-emotions"
+    for file_path in glob.glob(file_pat):
+        with open(file_path, 'rb') as voice:
+            response = requests.post(url, files={"voice_data":voice})
+            result = json.loads(response.content)
+            if result["status"] != "error":
+                for emotion in result["emotion_detail"].keys():
+                    #print(f"{emotion}: {result['emotion_detail'][emotion]}")
+                    print(f"{emotion}: {result['emotion_detail'][emotion]}")
+    return result
