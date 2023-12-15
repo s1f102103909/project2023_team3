@@ -1,7 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, StreamingHttpResponse
-from .forms import ChatForm
-from django.template import loader
+from django.http import StreamingHttpResponse
 from .models import UserInformation
 from .forms import SignUpForm
 from django.http import JsonResponse
@@ -44,9 +42,9 @@ rec_flag = False                          #撮影中かどうか
 speechTexts = [] # 音声合成したテキストを格納する変数
 responseTexts = [] # 返答テキストを格納する変数
 
-start_time = 0.0    
-user_end_time = []
-voicebox_end_time = []
+start_time = 0.0    #録音開始時刻の初期設定
+user_end_time = []  #ユーザーの喋り終わりの時間の配列
+voicebox_end_time = []  #VoiceBoxの喋り終わりの時間の配列
 
 audio_dir = "cutaudio"
 
