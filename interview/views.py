@@ -49,31 +49,29 @@ def home(request):
 def interview_practice(request):
     global chatgpt_chain, rec_flag
     rec_flag = False
-    chat_results = ""
-    #start_recording_thread = threading.Thread(target=rec2_start)
+    start_recording_thread = threading.Thread(target=rec2_start)
+    if request.method == "GET":
+        template = """
+                {history}
+                Human: {input}
+                AI: 
+                """
+        prompt = PromptTemplate(
+            input_variables = ["history","input"],
+            template = template
+        )   
+        chatgpt_chain = LLMChain(
+            llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
+            prompt=prompt,
+            verbose=True,
+            memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
+        )
+        return render(request, "interview/practice.html", {})
 
-    template = """
-            {history}
-            Human: {input}
-            AI: 
-            """
-    prompt = PromptTemplate(
-        input_variables = ["history","input"],
-        template = template
-    )   
-    chatgpt_chain = LLMChain(
-        llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
-        prompt=prompt,
-        verbose=True,
-        memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
-    )
-
-    if request.method == "POST":
-        # ChatGPTボタン押下時
-        form = ChatForm(request.POST)
+    if request.method == 'POST':
         #撮影してないならば、撮影スタート
         if rec_flag == False:
-            #start_recording_thread.start()
+            start_recording_thread.start()
             rec_flag = True
         #ChatGPTに面接のお願いをする文章
         prompt = """
@@ -85,17 +83,9 @@ def interview_practice(request):
                 """
         #返信をresoponseへ格納
         response = langchain_GPT(prompt)
-        #response = response.replace('AI', '')
-        chat_results = response
         responseTexts.append("面接官:{0}".format(response))
-    else:
-        form = ChatForm()
-    template = loader.get_template('interview/practice.html')
-    context = {
-        'form' : form, 
-        'chat_results' : chat_results
-    }
-    return HttpResponse(template.render(context, request))
+    
+        return JsonResponse({'message': response})
 
 #ホーム画面から成績画面の遷移
 def score(request):
@@ -268,44 +258,3 @@ def ChatGPT_to_Point(speechTexts,responseTexts):
         ]
     )
     return response.choices[0]['message']['content']
-
-@csrf_exempt
-def practice_demo(request):
-    global chatgpt_chain, rec_flag
-    rec_flag = False
-    chat_results = ""
-    start_recording_thread = threading.Thread(target=rec2_start)
-
-    template = """
-            {history}
-            Human: {input}
-            AI: 
-            """
-    prompt = PromptTemplate(
-        input_variables = ["history","input"],
-        template = template
-    )   
-    chatgpt_chain = LLMChain(
-        llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
-        prompt=prompt,
-        verbose=True,
-        memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
-    )
-    if request.method == 'POST':
-        #撮影してないならば、撮影スタート
-        if rec_flag == False:
-            start_recording_thread.start()
-            rec_flag = True
-        #ChatGPTに面接のお願いをする文章
-        prompt = """
-                We will now be conducting interviews. Please follow the conditions below.
-                1. You will be the interviewer and I will be the interviewee.
-                2. Please assume that the interview is for a new hire at an IT company.
-                3. Please ask me those questions one at a time.
-                4. At the end of the interview, please signal the end of the interview and grade the interview.
-                """
-        #返信をresoponseへ格納
-        response = langchain_GPT(prompt)
-        responseTexts.append("面接官:{0}".format(response))
-    
-    return JsonResponse({'message': response})
