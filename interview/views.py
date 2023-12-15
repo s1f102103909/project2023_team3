@@ -21,6 +21,7 @@ import pyaudio
 import wave
 from django.core.files import File
 import os
+import openai
 
 # Create your views here.
 # global変数
@@ -36,6 +37,9 @@ audio_filename = 'output_audio.wav'       #音声ファイル名
 rec_sig = []                              #音声フレームを格納する変数
 rec_flag = False                          #撮影中かどうか
 
+speechTexts = [] # 音声合成したテキストを格納する変数
+responseTexts = [] # 返答テキストを格納する変数
+
 #home.htmlへの遷移
 def home(request):
     return render(request, 'interview/home.html', {}) 
@@ -46,7 +50,7 @@ def interview_practice(request):
     global chatgpt_chain, rec_flag
     rec_flag = False
     chat_results = ""
-    start_recording_thread = threading.Thread(target=rec2_start)
+    #start_recording_thread = threading.Thread(target=rec2_start)
 
     template = """
             {history}
@@ -69,7 +73,7 @@ def interview_practice(request):
         form = ChatForm(request.POST)
         #撮影してないならば、撮影スタート
         if rec_flag == False:
-            start_recording_thread.start()
+            #start_recording_thread.start()
             rec_flag = True
         #ChatGPTに面接のお願いをする文章
         prompt = """
@@ -83,6 +87,7 @@ def interview_practice(request):
         response = langchain_GPT(prompt)
         #response = response.replace('AI', '')
         chat_results = response
+        responseTexts.append("面接官:{0}".format(response))
     else:
         form = ChatForm()
     template = loader.get_template('interview/practice.html')
@@ -113,26 +118,13 @@ def signup(request):
         form = SignUpForm()
     return render(request, "interview/signup.html", {"form":form})
 
-def check_speech_end(request):
-    return JsonResponse({'active':recognition.is_listening()})
-
 @csrf_exempt
 def process_text(request):
     if request.method == 'POST':
-        #text = request.POST.get('text')
-        # テキストの処理を実行
-        # ...
-        # 応答を返す
-
-        # 処理されたテキストをセッションに保存
-        #request.session['processed_text'] = text
-        
-        #return JsonResponse({'message': text })
-    #else:
-        #return JsonResponse({'message': 'Invalid request method'})
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
+        speechTexts.append("あなた:{0}".format(text))
         response = langchain_GPT(JP_To_EN(text))
 
         return JsonResponse({'message': response})
@@ -150,10 +142,15 @@ def result(request):
         rec2_stop()
         rec_flag = False
 
+        point = ChatGPT_to_Point(speechTexts,responseTexts)
+        point = EN_To_JP(point)
+        context = {'point': point}
+
         with open("main.mp4", "rb") as video_file:
             user.video.save(os.path.basename("") ,File(video_file), save=True)
-        return render(request, 'interview/result.html', {}) 
-    return error(request)
+        return render(request, 'interview/result.html',context)
+    else:
+        return render(request, 'interview/result.html',{})
 
 #何かしらエラーが発生した時に、エラー画面へ遷移
 def error(request):
@@ -164,6 +161,7 @@ def langchain_GPT(text):
     output = chatgpt_chain.predict(input=text)
     #output = output.replace('AI', '')
     output = EN_To_JP(output)
+    responseTexts.append("面接官:{0}".format(output))
     vv = Voicevox()
     vv.speak(text=output)
     return output
@@ -244,3 +242,70 @@ def rec2_stop():
     video = video.set_audio(mp.AudioFileClip(audio_filename))
     video.write_videofile("main.mp4")
     return 0
+
+def ChatGPT_to_Point(speechTexts,responseTexts):
+    history = ""
+    for i in range(len(speechTexts)):
+        history += "{0}\n".format(responseTexts[i])
+        history += "{0}\n".format(speechTexts[i])
+    openai.api_key = API_KEY_INIAD
+    openai.api_base= API_BASE
+    response = openai.ChatCompletion.create(
+        model = "gpt-3.5-turbo",
+        messages = [
+            {"role":"system",
+             "content":"""
+                    You are an interview critic. Please evaluate the interview dialogue history you received and provide a 70-word evaluation.
+                    Also, please give a score out of 100. Please grade them strictly.
+                    Your output should be in the following form.
+                    ------
+                    Score : Actual score
+                    Evaluation : Actual evaluation
+                    ------
+                    """},
+            {"role":"user",
+             "content":history}
+        ]
+    )
+    return response.choices[0]['message']['content']
+
+@csrf_exempt
+def practice_demo(request):
+    global chatgpt_chain, rec_flag
+    rec_flag = False
+    chat_results = ""
+    start_recording_thread = threading.Thread(target=rec2_start)
+
+    template = """
+            {history}
+            Human: {input}
+            AI: 
+            """
+    prompt = PromptTemplate(
+        input_variables = ["history","input"],
+        template = template
+    )   
+    chatgpt_chain = LLMChain(
+        llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
+        prompt=prompt,
+        verbose=True,
+        memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
+    )
+    if request.method == 'POST':
+        #撮影してないならば、撮影スタート
+        if rec_flag == False:
+            start_recording_thread.start()
+            rec_flag = True
+        #ChatGPTに面接のお願いをする文章
+        prompt = """
+                We will now be conducting interviews. Please follow the conditions below.
+                1. You will be the interviewer and I will be the interviewee.
+                2. Please assume that the interview is for a new hire at an IT company.
+                3. Please ask me those questions one at a time.
+                4. At the end of the interview, please signal the end of the interview and grade the interview.
+                """
+        #返信をresoponseへ格納
+        response = langchain_GPT(prompt)
+        responseTexts.append("面接官:{0}".format(response))
+    
+    return JsonResponse({'message': response})

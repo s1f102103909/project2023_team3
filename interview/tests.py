@@ -73,7 +73,7 @@ def JP_To_EN(text):
 
     result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
     
-    return result
+    return result.text
 
     #英語を日本語に翻訳
 def EN_To_JP(text):
@@ -84,4 +84,4 @@ def EN_To_JP(text):
 
     result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
     
-    return result
+    return result.text
