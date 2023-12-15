@@ -125,6 +125,7 @@ def process_text(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
         text = body_data['text']
+        user_end_time.append(time.time())
         speechTexts.append("あなた:{0}".format(text))
         response = langchain_GPT(JP_To_EN(text))
 
