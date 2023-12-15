@@ -22,6 +22,10 @@ import wave
 from django.core.files import File
 import os
 import openai
+from pydub import AudioSegment
+import time
+import requests
+import glob, shutil
 
 # Create your views here.
 # global変数
@@ -39,6 +43,12 @@ rec_flag = False                          #撮影中かどうか
 
 speechTexts = [] # 音声合成したテキストを格納する変数
 responseTexts = [] # 返答テキストを格納する変数
+
+start_time = 0.0    
+user_end_time = []
+voicebox_end_time = []
+
+audio_dir = "cutaudio"
 
 #home.htmlへの遷移
 def home(request):
@@ -130,6 +140,7 @@ def result(request):
     user = UserInformation.objects.get(Name=request.user.id)
     if rec_flag == True:
         rec2_stop()
+        sound_cut()
         rec_flag = False
 
         point = ChatGPT_to_Point(speechTexts,responseTexts)
@@ -258,3 +269,30 @@ def ChatGPT_to_Point(speechTexts,responseTexts):
         ]
     )
     return response.choices[0]['message']['content']
+
+#ユーザーの音声だけを抜き取る
+def sound_cut():
+    if os.path.isdir(audio_dir):
+        shutil.rmtree(audio_dir)
+    os.makedirs("cutaudio")
+    for i in range(len(user_end_time)):
+        diff_with_voicebox = voicebox_end_time[i] - start_time
+        diff_with_user = user_end_time[i] -start_time
+        sound = AudioSegment.from_file("output_audio.wav", format="wav")
+        cutsound = sound[diff_with_voicebox*1000:diff_with_user*1000]
+        cutsound.export(f"cutaudio/score{i+1}.wav", format="wav")
+
+#ユーザーの音声から、感情を判定
+def voice_result():
+    result = ""
+    file_pat = "{}/*.wav".format(audio_dir)
+    url = "https://ai-api.userlocal.jp/voice-emotion/basic-emotions"
+    for file_path in glob.glob(file_pat):
+        with open(file_path, 'rb') as voice:
+            response = requests.post(url, files={"voice_data":voice})
+            result = json.loads(response.content)
+            if result["status"] != "error":
+                for emotion in result["emotion_detail"].keys():
+                    #print(f"{emotion}: {result['emotion_detail'][emotion]}")
+                    print(f"{emotion}: {result['emotion_detail'][emotion]}")
+    return result
