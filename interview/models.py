@@ -15,8 +15,7 @@ def dir_path_name(instance, filename):
 
 class UserInformation(models.Model):
     Name = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
-    Shushoku_previousScore = models.IntegerField(blank=True, null=True)
-    Shushoku_maxScore = models.IntegerField(blank=True, null=True)
+    advise = models.CharField(max_length=1000, null=True, blank=True)
     video = models.FileField(upload_to=dir_path_name, null=True, blank=True)
     
     def __str__(self):
@@ -26,8 +25,7 @@ class UserInformation(models.Model):
 def user_created(sender, instance, created, **kwargs):
     if created:
         user_obj = UserInformation(Name = instance)
-        user_obj.Shushoku_previousScore = 0
-        user_obj.Shushoku_maxScore = 0
+        user_obj.advise = ""
         user_obj.save()
 
 post_save.connect(user_created, sender=User)

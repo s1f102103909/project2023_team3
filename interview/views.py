@@ -100,8 +100,7 @@ def interview_practice(request):
 def score(request):
     user = UserInformation.objects.get(Name=request.user.id)
     context = {
-        "max_score" : user.Shushoku_maxScore,
-        "previous_score" : user.Shushoku_previousScore,
+        "advise" : user.advise,
         "video" : user.video
     }
     return render(request, 'interview/score.html', context) 
@@ -146,7 +145,8 @@ def result(request):
         point = ChatGPT_to_Point(speechTexts,responseTexts)
         point = EN_To_JP(point)
         context = {'point': point}
-
+        user.advise = point
+        user.save()
         with open("main.mp4", "rb") as video_file:
             user.video.save(os.path.basename("") ,File(video_file), save=True)
         return render(request, 'interview/result.html',context)
@@ -286,7 +286,14 @@ def sound_cut():
 
 #ユーザーの音声から、感情を判定
 def voice_result():
-    result = ""
+    angry = []
+    disgust = []
+    fear = []
+    happy = []
+    neutral = []
+    sad = []
+    suprise = []
+    emotion_dic = {"angry":angry, "disgust":disgust, "fear":fear, "happy":happy, "neutral":neutral, "sad":sad, "suprise":suprise}
     file_pat = "{}/*.wav".format(audio_dir)
     url = "https://ai-api.userlocal.jp/voice-emotion/basic-emotions"
     for file_path in glob.glob(file_pat):
@@ -296,5 +303,5 @@ def voice_result():
             if result["status"] != "error":
                 for emotion in result["emotion_detail"].keys():
                     #print(f"{emotion}: {result['emotion_detail'][emotion]}")
-                    print(f"{emotion}: {result['emotion_detail'][emotion]}")
-    return result
+                    emotion_dic[emotion].append(result["emotion_detail"][emotion])
+    
