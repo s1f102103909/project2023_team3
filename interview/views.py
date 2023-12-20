@@ -293,6 +293,7 @@ def voice_result():
     neutral = []
     sad = []
     suprise = []
+    emotion_dic = {"angry":angry, "disgust":disgust, "fear":fear, "happy":happy, "neutral":neutral, "sad":sad, "suprise":suprise}
     file_pat = "{}/*.wav".format(audio_dir)
     url = "https://ai-api.userlocal.jp/voice-emotion/basic-emotions"
     for file_path in glob.glob(file_pat):
@@ -301,4 +302,6 @@ def voice_result():
             result = json.loads(response.content)
             if result["status"] != "error":
                 for emotion in result["emotion_detail"].keys():
-                    print(f"{emotion}: {result['emotion_detail'][emotion]}")
+                    #print(f"{emotion}: {result['emotion_detail'][emotion]}")
+                    emotion_dic[emotion].append(result["emotion_detail"][emotion])
+    
