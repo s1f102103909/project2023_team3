@@ -7,9 +7,7 @@
   <body>
     <p>{{ user.username }}さんのスコアです。</p>
     
-    <p>最高スコア : {{ max_score }}</p>
-    
-    <p>前回のスコア : {{ previous_score}}</p>
+    <p>前回のアドバイス : {{ previous_advise }}</p>
 
     {% if user.video is true %}
     <p>前回のビデオ</p>
