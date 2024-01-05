@@ -143,10 +143,19 @@ def result(request):
         sound_cut()
         rec_flag = False
 
-        point = ChatGPT_to_Point(speechTexts,responseTexts)
-        point = EN_To_JP(point)
-        context = {'point': point}
-        user.advise = point
+        interview_result = ChatGPT_to_Result(speechTexts,responseTexts)
+        print(interview_result)
+        score_point = interview_result.find("Score")
+        Evaluation_point = interview_result.find("Evaluation")
+        Advice_point = interview_result.find("Advice")
+        Score = interview_result[score_point+6:Evaluation_point]
+        Evaluation = interview_result[Evaluation_point+11:Advice_point]
+        Advice = interview_result[Advice_point+23:]
+        Score = EN_To_JP(Score)
+        Evaluation = EN_To_JP(Evaluation)
+        Advice = EN_To_JP(Advice)
+        context = {'score': Score,'evaluation':Evaluation,'advice':Advice}
+        user.advise = Advice
         user.save()
         with open("main.mp4", "rb") as video_file:
             user.video.save(os.path.basename("") ,File(video_file), save=True)
@@ -246,7 +255,7 @@ def rec2_stop():
     video.write_videofile("main.mp4")
     return 0
 
-def ChatGPT_to_Point(speechTexts,responseTexts):
+def ChatGPT_to_Result(speechTexts,responseTexts):
     history = ""
     for i in range(len(speechTexts)):
         history += "{0}\n".format(responseTexts[i])
@@ -258,12 +267,13 @@ def ChatGPT_to_Point(speechTexts,responseTexts):
         messages = [
             {"role":"system",
              "content":"""
-                    You are an interview critic. Please evaluate the interview dialogue history you received and provide a 70-word evaluation.
-                    Also, please give a score out of 100. Please grade them strictly.
-                    Your output should be in the following form.
+                    YYou are a professional interview critic. Please evaluate and advise on the interview's dialogue history.
+                    Also, please grade the interview on a 100-point scale. Please be strict in your scoring.
+                    Output should be in the following format
                     ------
-                    Score : Actual score
-                    Evaluation : Actual evaluation
+                    Score: Evaluation Score
+                    Evaluation: Evaluation details
+                    Advice for improvement: Advice 
                     ------
                     """},
             {"role":"user",
