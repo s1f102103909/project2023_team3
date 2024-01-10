@@ -89,6 +89,11 @@
             const response = document.createElement("div");
             response.textContent = JSON.parse(xhr.responseText).message;
             responseContainer.appendChild(response);
+            if (toResult(response.textContent)){
+              setTimeout(function () {
+              }, 1000);
+              window.location.href = "result";
+            }
           }
         };
         xhr.send(JSON.stringify({ text: transcript }));
@@ -122,6 +127,10 @@
       //practice_demo.style.display = "none";  // 練習開始デモボタンを非表示に
       practice_demo.disabled = true;  // 練習開始デモボタンを無効化
     });
+
+    function toResult(text){
+      return text.includes("ありがとう");
+    }
 
   </script>
 </body>

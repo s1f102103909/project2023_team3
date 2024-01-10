@@ -12,7 +12,7 @@ import moviepy.editor as mp
 from langchain.llms.openai import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.memory import ConversationBufferWindowMemory
+from langchain.memory import ConversationBufferMemory
 from .tests import Voicevox
 from .tests import EN_To_JP, JP_To_EN
 import pyaudio
@@ -23,11 +23,11 @@ import openai
 from pydub import AudioSegment
 import time
 import requests
-import glob, shutil
+import glob, shutil, re
 
 # Create your views here.
 # global変数
-API_KEY_INIAD ="ehoIeOxmC5m1SAEwGLysEqLy5QIh0XwWLp3zIlBAcy4dcsi2BhH_L_fo8lQVK27HxijRfbqqEHgqeWTOiReCwIQ"
+API_KEY_INIAD ="7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
 video_filename = 'output.mp4'             #動画ファイル名(音無し)
@@ -72,7 +72,7 @@ def interview_practice(request):
             llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
             prompt=prompt,
             verbose=True,
-            memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
+            memory=ConversationBufferMemory(memory_key="history"),
         )
         return render(request, "interview/practice.html", {})
 
@@ -87,8 +87,9 @@ def interview_practice(request):
                 We will now be conducting interviews. Please follow the conditions below.
                 1. You will be the interviewer and I will be the interviewee.
                 2. Please assume that the interview is for a new hire at an IT company.
-                3. Please ask me those questions one at a time.
-                4. At the end of the interview, please signal the end of the interview and grade the interview.
+                3. Please ask me one question at a time.
+                4. Please don't ask the same question and similar questions.
+                5. At the end of the interview, please signal the end of the interview.
                 """
         #返信をresoponseへ格納
         response = langchain_GPT(prompt)
@@ -100,7 +101,7 @@ def interview_practice(request):
 def score(request):
     user = UserInformation.objects.get(Name=request.user.id)
     context = {
-        "advise" : user.advise,
+        "previous_advise" : user.advise,
         "video" : user.video
     }
     return render(request, 'interview/score.html', context) 
@@ -258,11 +259,15 @@ def ChatGPT_to_Point(speechTexts,responseTexts):
             {"role":"system",
              "content":"""
                     You are an interview critic. Please evaluate the interview dialogue history you received and provide a 70-word evaluation.
-                    Also, please give a score out of 100. Please grade them strictly.
-                    Your output should be in the following form.
+                    Also, please give a score out of 100. Please grade strictly, focusing on the following points.
+                        Point 1: Expertise and skills
+                        Point 2: Motivation and enthusiasm
+                        Point 3: Personality and values
+                        Point 4: Adaptability and flexibility
+                    Outputs should be in the following format
                     ------
-                    Score : Actual score
-                    Evaluation : Actual evaluation
+                    Score :
+                    Evaluation :
                     ------
                     """},
             {"role":"user",

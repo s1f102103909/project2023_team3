@@ -17,6 +17,7 @@ class UserInformation(models.Model):
     Name = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
     advise = models.CharField(max_length=1000, null=True, blank=True)
     video = models.FileField(upload_to=dir_path_name, null=True, blank=True)
+    result_images = models.ImageField()
     
     def __str__(self):
         return str(self.Name)
