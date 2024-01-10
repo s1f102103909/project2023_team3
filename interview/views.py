@@ -25,6 +25,8 @@ import time
 import requests
 import glob, shutil
 import matplotlib.pyplot as plt
+import re
+import alkana
 
 # Create your views here.
 # global変数
@@ -174,7 +176,7 @@ def langchain_GPT(text):
     output = EN_To_JP(output)
     responseTexts.append("面接官:{0}".format(output))
     vv = Voicevox()
-    vv.speak(text=output)
+    vv.speak(text=draw_english(output))
     voicebox_end_time.append(time.time())   #VoiceBoxが喋り終わった時間
     return output
 
@@ -353,3 +355,11 @@ def graph(emotion_dic):
     
     plt.tight_layout()  # レイアウトの調整
     plt.savefig("emotion_graph.png")
+def draw_english(text):
+    english_list = re.findall(r"[A-Za-z]+",text)
+    japanese_list = []
+    for english in english_list:
+        japanese_list.append(alkana.get_kana(english))
+    for i in range(len(english_list)):
+        text.replace(english_list[i],japanese_list[i])
+    return text
