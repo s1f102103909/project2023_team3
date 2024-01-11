@@ -270,16 +270,13 @@ def ChatGPT_to_Point(speechTexts,responseTexts):
         messages = [
             {"role":"system",
              "content":"""
-                    You are an interview critic. Please evaluate the interview dialogue history you received and provide a 70-word evaluation.
-                    Also, please give a score out of 100. Please grade strictly, focusing on the following points.
-                        Point 1: Expertise and skills
-                        Point 2: Motivation and enthusiasm
-                        Point 3: Personality and values
-                        Point 4: Adaptability and flexibility
-                    Outputs should be in the following format
+                    You are a professional interview critic. Please evaluate and advise on the interview's dialogue history.
+                    Also, please grade the interview on a 100-point scale. Please be strict in your scoring.
+                    Output should be in the following format
                     ------
-                    Score :
-                    Evaluation :
+                    Score: Evaluation Score
+                    Evaluation: Evaluation details
+                    Advice for improvement: Advice 
                     ------
                     """},
             {"role":"user",
