@@ -22,6 +22,8 @@ def dir_path_name_graph(instance, filename):
 
 class UserInformation(models.Model):
     Name = models.OneToOneField(User, on_delete=models.CASCADE, null=False)
+    score = models.CharField(max_length=1000, null=True, blank=True)
+    evaluation= models.CharField(max_length=1000, null=True, blank=True)
     advise = models.CharField(max_length=1000, null=True, blank=True)
     video = models.FileField(upload_to=dir_path_name, null=True, blank=True)
     result_images = models.ImageField(upload_to=dir_path_name_graph, null=True, blank=True)
@@ -29,11 +31,9 @@ class UserInformation(models.Model):
     def __str__(self):
         return str(self.Name)
     
-
 def user_created(sender, instance, created, **kwargs):
     if created:
         user_obj = UserInformation(Name = instance)
-        user_obj.advise = ""
         user_obj.save()
 
 post_save.connect(user_created, sender=User)

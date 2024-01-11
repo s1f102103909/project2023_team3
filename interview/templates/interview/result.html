@@ -11,14 +11,13 @@
     <p>評価：{{ evaluation }}</p>
     <p>アドバイス：{{ advice }}</p>
 
-
     {% if graph %}
     <p>今回の{{ user.username }}さんの音声感情のグラフです。</p>
       <img src="{{ graph.url }}" alt="Image">
     {% else %}
     <p>音声が読み取れませんでした。</p>
     {% endif %}
-    
+
     <a href="{% url 'home' %}">ホーム画面へ</a>
   </body>
 </html>

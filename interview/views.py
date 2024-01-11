@@ -105,7 +105,9 @@ def interview_practice(request):
 def score(request):
     user = UserInformation.objects.get(Name=request.user.id)
     context = {
-        "previous_advise" : user.advise,
+        "score" : user.score,
+        "evaluation" : user.evaluation, 
+        "advice" : user.advise,
         "video" : user.video,
         "graph" : user.result_images
     }
@@ -149,7 +151,6 @@ def result(request):
         voice_result()
         rec_flag = False
 
-
         interview_result = ChatGPT_to_Result(speechTexts,responseTexts)
         #print(interview_result)
         score_point = interview_result.find("Score")
@@ -158,11 +159,11 @@ def result(request):
         Score = interview_result[score_point+6:Evaluation_point]
         Evaluation = interview_result[Evaluation_point+11:Advice_point]
         Advice = interview_result[Advice_point+23:]
-        Score = EN_To_JP(Score)
         Evaluation = EN_To_JP(Evaluation)
         Advice = EN_To_JP(Advice)
-        context = {'score': Score,'evaluation':Evaluation,'advice':Advice}
         
+        user.score = Score
+        user.evaluation = Evaluation
         user.advise = Advice
         user.save()
 
@@ -172,9 +173,9 @@ def result(request):
         with open("emotion_graph.png", "rb") as image_file:
             user.result_images.save(os.path.basename(""), File(image_file), save=True)
             
-        context = {'score':  Score,
-                   'evaluation' : Evaluation,
-                   'advice' : Advice, 
+        context = {'score':  user.score,
+                   'evaluation' : user.evaluation,
+                   'advice' : user.advise, 
                    "graph" : user.result_images
                 }
     

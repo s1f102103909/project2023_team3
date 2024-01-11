@@ -5,10 +5,16 @@
     <title>score</title>
   </head>
   <body>
-    <p>{{ user.username }}さんのスコアです。</p>
+    <p>{{ user.username }}さんの成績です。</p>
     
-    <p>前回のアドバイス 
-       {{ previous_advise }}</p>
+    {% if score %}
+    <p>前回の結果です。</p>
+    <p>スコア：{{ score }}</p>
+    <p>評価：{{ evaluation }}</p>
+    <p>アドバイス：{{ advice }}</p>
+    {% else %}
+    <p>面接練習を行なっていません。</p>
+    {% endif %}
 
     {% if video %}
     <p>前回の面接動画です。</p>
@@ -23,7 +29,7 @@
     <p>前回の面接の音声感情のグラフです。</p>
       <img src="{{ graph.url }}" alt="Image">
     {% else %}
-    <p>グラフはありません。</p>
+    <p>音声感情のグラフはありません。</p>
     {% endif %}
   </body>
 </html>
