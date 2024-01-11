@@ -12,7 +12,7 @@ import moviepy.editor as mp
 from langchain.llms.openai import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.memory import ConversationBufferWindowMemory
+from langchain.memory import ConversationBufferMemory
 from .tests import Voicevox
 from .tests import EN_To_JP, JP_To_EN
 import pyaudio
@@ -27,10 +27,11 @@ import glob, shutil
 import matplotlib.pyplot as plt
 import re
 import alkana
+import matplotlib
 
 # Create your views here.
 # global変数
-API_KEY_INIAD ="ehoIeOxmC5m1SAEwGLysEqLy5QIh0XwWLp3zIlBAcy4dcsi2BhH_L_fo8lQVK27HxijRfbqqEHgqeWTOiReCwIQ"
+API_KEY_INIAD ="7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
 API_BASE = "https://api.openai.iniad.org/api/v1"
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
 video_filename = 'output.mp4'             #動画ファイル名(音無し)
@@ -75,7 +76,7 @@ def interview_practice(request):
             llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
             prompt=prompt,
             verbose=True,
-            memory=ConversationBufferWindowMemory(k=10, memory_key="history"),
+            memory=ConversationBufferMemory(memory_key="history"),
         )
         return render(request, "interview/practice.html", {})
 
@@ -90,8 +91,9 @@ def interview_practice(request):
                 We will now be conducting interviews. Please follow the conditions below.
                 1. You will be the interviewer and I will be the interviewee.
                 2. Please assume that the interview is for a new hire at an IT company.
-                3. Please ask me those questions one at a time.
-                4. At the end of the interview, please signal the end of the interview and grade the interview.
+                3. Please ask me one question at a time.
+                4. Please don't ask the same question and similar questions.
+                5. At the end of the interview, please signal the end of the interview.
                 """
         #返信をresoponseへ格納
         response = langchain_GPT(prompt)
@@ -103,8 +105,9 @@ def interview_practice(request):
 def score(request):
     user = UserInformation.objects.get(Name=request.user.id)
     context = {
-        "advise" : user.advise,
-        "video" : user.video
+        "previous_advise" : user.advise,
+        "video" : user.video,
+        "graph" : user.result_images
     }
     return render(request, 'interview/score.html', context) 
 
@@ -143,10 +146,12 @@ def result(request):
     if rec_flag == True:
         rec2_stop()
         sound_cut()
+        voice_result()
         rec_flag = False
 
+
         interview_result = ChatGPT_to_Result(speechTexts,responseTexts)
-        print(interview_result)
+        #print(interview_result)
         score_point = interview_result.find("Score")
         Evaluation_point = interview_result.find("Evaluation")
         Advice_point = interview_result.find("Advice")
@@ -157,10 +162,22 @@ def result(request):
         Evaluation = EN_To_JP(Evaluation)
         Advice = EN_To_JP(Advice)
         context = {'score': Score,'evaluation':Evaluation,'advice':Advice}
+        
         user.advise = Advice
         user.save()
+
         with open("main.mp4", "rb") as video_file:
             user.video.save(os.path.basename("") ,File(video_file), save=True)
+
+        with open("emotion_graph.png", "rb") as image_file:
+            user.result_images.save(os.path.basename(""), File(image_file), save=True)
+            
+        context = {'score':  Score,
+                   'evaluation' : Evaluation,
+                   'advice' : Advice, 
+                   "graph" : user.result_images
+                }
+    
         return render(request, 'interview/result.html',context)
     else:
         return render(request, 'interview/result.html',{})
@@ -305,8 +322,8 @@ def voice_result():
     happy = []
     neutral = []
     sad = []
-    suprise = []
-    emotion_dic = {"angry":angry, "disgust":disgust, "fear":fear, "happy":happy, "neutral":neutral, "sad":sad, "suprise":suprise}
+    surprise = []
+    emotion_dic = {"angry":angry, "disgust":disgust, "fear":fear, "happy":happy, "neutral":neutral, "sad":sad, "surprise":surprise}
     file_pat = "{}/*.wav".format(audio_dir)
     url = "https://ai-api.userlocal.jp/voice-emotion/basic-emotions"
     for file_path in glob.glob(file_pat):
@@ -317,13 +334,11 @@ def voice_result():
                 for emotion in result["emotion_detail"].keys():
                     #print(f"{emotion}: {result['emotion_detail'][emotion]}")
                     emotion_dic[emotion].append(result["emotion_detail"][emotion])
-
     graph(emotion_dic)
 
 def graph(emotion_dic):
     x = list(range(1, len(next(iter(emotion_dic.values()))) + 1))
     plt.figure(figsize=(10, 6))
-    
     for emotion, values in emotion_dic.items():
        marker_styles = {
            "angry": 'o',      # 丸
@@ -334,7 +349,6 @@ def graph(emotion_dic):
            "sad": 'D',        # ダイヤ
            "surprise": 'P'    # 五角形
        }
-    
        # カラーのマッピングも追加
        color_styles = {
            "angry": 'r',
@@ -345,16 +359,17 @@ def graph(emotion_dic):
            "sad": 'b',
            "surprise": 'y'
        }
-    
        plt.plot(x, values, label=emotion.capitalize(), marker=marker_styles[emotion], color=color_styles[emotion])
-    
+
+
     #plt.xlabel('Time')  # x軸のラベル
     #plt.ylabel('Emotion Intensity')  # y軸のラベル
     plt.legend()  # 凡例の表示
     plt.grid(True)  # グリッドの表示
-    
     plt.tight_layout()  # レイアウトの調整
     plt.savefig("emotion_graph.png")
+    matplotlib.use("Agg")
+
 def draw_english(text):
     english_list = re.findall(r"[A-Za-z]+",text)
     japanese_list = []
@@ -363,3 +378,6 @@ def draw_english(text):
     for i in range(len(english_list)):
         text.replace(english_list[i],japanese_list[i])
     return text
+
+    
+

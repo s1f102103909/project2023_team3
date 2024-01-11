@@ -7,15 +7,23 @@
   <body>
     <p>{{ user.username }}さんのスコアです。</p>
     
-    <p>前回のアドバイス : {{ previous_advise }}</p>
+    <p>前回のアドバイス 
+       {{ previous_advise }}</p>
 
-    {% if user.video is true %}
-    <p>前回のビデオ</p>
+    {% if video %}
+    <p>前回の面接動画です。</p>
     <video controls width="600" height="400">
       <source src="{{ video.url }}" type="{{ video.content_type }}">
     </video>
     {% else %}
-    <p>Not found video</p>
+    <p>面接動画がありません。</p>
+    {% endif %}
+
+    {% if graph %}
+    <p>前回の面接の音声感情のグラフです。</p>
+      <img src="{{ graph.url }}" alt="Image">
+    {% else %}
+    <p>グラフはありません。</p>
     {% endif %}
   </body>
 </html>
