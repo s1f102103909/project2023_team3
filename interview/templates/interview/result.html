@@ -6,8 +6,19 @@
   </head>
   <body>
     <p>{{ user.username }}さん</p>
-    <p>今回の結果です。</p>
+    {% if point %}
+    <p>今回の採点結果です。</p>
     <p>{{ point }}</p>
+    {% else %}
+    <p>採点されませんでした。</p>
+    {% endif %}
+
+    {% if graph %}
+    <p>今回の{{ user.username }}さんの音声感情のグラフです。</p>
+      <img src="{{ graph.url }}" alt="Image">
+    {% else %}
+    <p>音声が読み取れませんでした。</p>
+    {% endif %}
     <a href="{% url 'home' %}">ホーム画面へ</a>
   </body>
 </html>

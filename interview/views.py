@@ -23,7 +23,9 @@ import openai
 from pydub import AudioSegment
 import time
 import requests
-import glob, shutil, re
+import glob, shutil
+import matplotlib.pyplot as plt
+import matplotlib
 
 # Create your views here.
 # global変数
@@ -102,7 +104,8 @@ def score(request):
     user = UserInformation.objects.get(Name=request.user.id)
     context = {
         "previous_advise" : user.advise,
-        "video" : user.video
+        "video" : user.video,
+        "graph" : user.result_images
     }
     return render(request, 'interview/score.html', context) 
 
@@ -141,15 +144,24 @@ def result(request):
     if rec_flag == True:
         rec2_stop()
         sound_cut()
+        voice_result()
         rec_flag = False
 
         point = ChatGPT_to_Point(speechTexts,responseTexts)
         point = EN_To_JP(point)
-        context = {'point': point}
         user.advise = point
         user.save()
+
         with open("main.mp4", "rb") as video_file:
             user.video.save(os.path.basename("") ,File(video_file), save=True)
+
+        with open("emotion_graph.png", "rb") as image_file:
+            user.result_images.save(os.path.basename(""), File(image_file), save=True)
+            
+        context = {
+            "point" : point,
+            "graph" : user.result_images
+        }
         return render(request, 'interview/result.html',context)
     else:
         return render(request, 'interview/result.html',{})
@@ -297,8 +309,8 @@ def voice_result():
     happy = []
     neutral = []
     sad = []
-    suprise = []
-    emotion_dic = {"angry":angry, "disgust":disgust, "fear":fear, "happy":happy, "neutral":neutral, "sad":sad, "suprise":suprise}
+    surprise = []
+    emotion_dic = {"angry":angry, "disgust":disgust, "fear":fear, "happy":happy, "neutral":neutral, "sad":sad, "surprise":surprise}
     file_pat = "{}/*.wav".format(audio_dir)
     url = "https://ai-api.userlocal.jp/voice-emotion/basic-emotions"
     for file_path in glob.glob(file_pat):
@@ -309,4 +321,38 @@ def voice_result():
                 for emotion in result["emotion_detail"].keys():
                     #print(f"{emotion}: {result['emotion_detail'][emotion]}")
                     emotion_dic[emotion].append(result["emotion_detail"][emotion])
+    graph(emotion_dic)
+
+def graph(emotion_dic):
+    x = list(range(1, len(next(iter(emotion_dic.values()))) + 1))
+    plt.figure(figsize=(10, 6))
+    for emotion, values in emotion_dic.items():
+       marker_styles = {
+           "angry": 'o',      # 丸
+           "disgust": 's',    # 四角
+           "fear": '^',       # 上向き三角
+           "happy": '*',      # 星
+           "neutral": 'x',    # バツ
+           "sad": 'D',        # ダイヤ
+           "surprise": 'P'    # 五角形
+       }
+       # カラーのマッピングも追加
+       color_styles = {
+           "angry": 'r',
+           "disgust": 'c',
+           "fear": 'k',
+           "happy": 'm',
+           "neutral": 'g',
+           "sad": 'b',
+           "surprise": 'y'
+       }
+       plt.plot(x, values, label=emotion.capitalize(), marker=marker_styles[emotion], color=color_styles[emotion])
+    #plt.xlabel('Time')  # x軸のラベル
+    #plt.ylabel('Emotion Intensity')  # y軸のラベル
+    plt.legend()  # 凡例の表示
+    plt.grid(True)  # グリッドの表示
+    plt.tight_layout()  # レイアウトの調整
+
+    plt.savefig("emotion_graph.png")
+    matplotlib.use("Agg")
     
