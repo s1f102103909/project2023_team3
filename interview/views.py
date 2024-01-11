@@ -360,8 +360,6 @@ def graph(emotion_dic):
            "surprise": 'y'
        }
        plt.plot(x, values, label=emotion.capitalize(), marker=marker_styles[emotion], color=color_styles[emotion])
-
-
     #plt.xlabel('Time')  # x軸のラベル
     #plt.ylabel('Emotion Intensity')  # y軸のラベル
     plt.legend()  # 凡例の表示
