@@ -269,7 +269,7 @@ def ChatGPT_to_Result(speechTexts,responseTexts):
         messages = [
             {"role":"system",
              "content":"""
-                    YYou are a professional interview critic. Please evaluate and advise on the interview's dialogue history.
+                    You are a professional interview critic. Please evaluate and advise on the interview's dialogue history.
                     Also, please grade the interview on a 100-point scale. Please be strict in your scoring.
                     Output should be in the following format
                     ------
