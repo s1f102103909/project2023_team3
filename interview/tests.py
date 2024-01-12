@@ -1,16 +1,14 @@
 from django.test import TestCase
 
 # Create your tests here.
-import os
+
 import pyaudio
 import wave
 import time
 import requests, json
 import io
-
 import deepl
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS']='glossy-aloe-396205-d7fdd774bdbe.json'
 
 speech_active = False
 
