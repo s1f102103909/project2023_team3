@@ -371,7 +371,7 @@ def graph(emotion_dic):
     matplotlib.use("Agg")
 
 def draw_english(text):
-    english_list = re.findall(r"[A-Za-z]+",text)
+    english_list = re.findall(r"[A-Za-z]{4,}",text)
     japanese_list = []
     for english in english_list:
         japanese_list.append(alkana.get_kana(english))
