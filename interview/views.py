@@ -295,7 +295,7 @@ def ChatGPT_to_Result(speechTexts,responseTexts):
                     Score: Evaluation Score
                     Evaluation: Evaluation details
                     Advice for improvement: Advice 
-                    
+                    ------
                     """},
             {"role":"user",
              "content":history}
@@ -380,6 +380,3 @@ def draw_english(text):
             japanese_list[i] = english_list[i]
         text=text.replace(english_list[i],japanese_list[i])
     return text
-
-    
-
