@@ -288,13 +288,14 @@ def ChatGPT_to_Result(speechTexts,responseTexts):
             {"role":"system",
              "content":"""
                     You are a professional interview critic. Please evaluate and advise on the interview's dialogue history.
+                    Please include the following criteria in your evaluation "Is it self-motivated?" , "Does it answer the question?" and "Does it have a sense of humor?"
                     Also, please grade the interview on a 100-point scale. Please be strict in your scoring.
                     Output should be in the following format
                     ------
                     Score: Evaluation Score
                     Evaluation: Evaluation details
                     Advice for improvement: Advice 
-                    ------
+                    
                     """},
             {"role":"user",
              "content":history}
@@ -375,7 +376,9 @@ def draw_english(text):
     for english in english_list:
         japanese_list.append(alkana.get_kana(english))
     for i in range(len(english_list)):
-        text.replace(english_list[i],japanese_list[i])
+        if japanese_list[i] == None:
+            japanese_list[i] = english_list[i]
+        text=text.replace(english_list[i],japanese_list[i])
     return text
 
     
