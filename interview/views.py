@@ -11,7 +11,7 @@ import threading
 import moviepy.editor as mp
 from langchain.llms.openai import OpenAI
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain.chains import LLMChain, ConversationChain
 from langchain.memory import ConversationBufferMemory
 from .tests import Voicevox
 from .tests import EN_To_JP, JP_To_EN
@@ -64,14 +64,15 @@ def interview_practice(request):
     start_recording_thread = threading.Thread(target=rec2_start)
     if request.method == "GET":
         template = """
+                You should generate the AI: and subsequent sentences.
                 {history}
                 Human: {input}
                 AI: 
                 """
         prompt = PromptTemplate(
-            input_variables = ["history","input"],
+            input_variables = ["history", "input"],
             template = template
-        )   
+        )
         chatgpt_chain = LLMChain(
             llm = OpenAI(temperature=0, openai_api_key=API_KEY_INIAD, openai_api_base=API_BASE),
             prompt=prompt,
@@ -94,6 +95,7 @@ def interview_practice(request):
                 3. Please ask me one question at a time.
                 4. Please don't ask the same question and similar questions.
                 5. At the end of the interview, please signal the end of the interview.
+                6. please do not ask new questions until I have answered them.
                 """
         #返信をresoponseへ格納
         response = langchain_GPT(prompt)
@@ -178,7 +180,11 @@ def result(request):
                    'advice' : user.advise, 
                    "graph" : user.result_images
                 }
-    
+        
+        #切り取ったサウンドフォルダを削除
+        #if os.path.isdir(audio_dir):
+            #shutil.rmtree(audio_dir)
+
         return render(request, 'interview/result.html',context)
     else:
         return render(request, 'interview/result.html',{})
