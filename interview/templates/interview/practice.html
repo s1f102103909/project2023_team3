@@ -11,13 +11,30 @@
     />
     <title>Document</title>
     <style>
+      header {
+        top: 0;
+        width: 100%;
+        margin-bottom: 5px;
+        text-align: center;
+        height: 70px;
+        background-color: white;
+        border-bottom: 2px solid rgb(56, 56, 69);
+        border-radius: 0px 0px 100px 0px;
+        font: 300 40px "open sans", sans-serif;
+      }
       body {
-        display: flex;
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
         background-color: #f0f0f0;
         height: 100vh;
+      }
+
+      main {
+        display: flex;
+      }
+      .main {
+        display: flex;
       }
       .head-btn {
         display: flex;
@@ -50,9 +67,10 @@
       }
 
       .chatList {
+        display: block;
         align-items: center;
         justify-content: center;
-        width: 500px;
+        max-width: 600px;
         width: 100%;
         border: 1px solid #ccc;
         border-radius: 8px;
@@ -63,7 +81,7 @@
         max-width: 500px;
         padding: 10px;
         overflow-y: auto;
-        height: 450px;
+        height: 380px;
       }
 
       .message {
@@ -72,6 +90,7 @@
         border-radius: 5px;
       }
       .user-message {
+        text-align: right;
         background-color: #a6e1fa;
         align-self: flex-end;
       }
@@ -84,29 +103,37 @@
       img {
         border-radius: 30px;
         margin: 20px;
-        width: 500px;
-        height: 350px;
+        width: 600px;
+        height: 400px;
       }
     </style>
   </head>
   <body>
-    <img id="video" src="{% url 'camera_stream' %}" width="810" height="500" />
-
-    <br />
-    <main>
-      <div class="head-btn">
-        <form method="POST">
-          {% csrf_token %}
-          <button type="button" class="practice">練習開始</button>
-        </form>
-        <button type="button" class="btn">回答開始</button>
-      </div>
-      <div id="output"></div>
-      <div class="output-container"></div>
-      <div class="response-container"></div>
-      <div class="chatList"><div class="record"></div></div>
-      <button onclick="location.href='/result'">結果画面へ</button>
-    </main>
+    <header>LOGO</header>
+    <div class="main">
+      <img
+        id="video"
+        src="{% url 'camera_stream' %}"
+        width="810"
+        height="500"
+      />
+      <main>
+        <div class="main2">
+          <div class="head-btn">
+            <form method="POST">
+              {% csrf_token %}
+              <button type="button" class="practice">練習開始</button>
+            </form>
+            <button type="button" class="btn">回答開始</button>
+          </div>
+          <div id="output" hidden></div>
+          <div class="output-container"></div>
+          <div class="response-container"></div>
+          <div class="chatList"><div class="record"></div></div>
+          <button onclick="location.href='/result'">結果画面へ</button>
+        </div>
+      </main>
+    </div>
     <script>
       //demoボタン設定
       const practice_demo = document.querySelector(".practice");
