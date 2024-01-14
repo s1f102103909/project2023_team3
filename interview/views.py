@@ -11,7 +11,7 @@ import threading
 import moviepy.editor as mp
 from langchain.llms.openai import OpenAI
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain, ConversationChain
+from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from .tests import Voicevox
 from .tests import EN_To_JP, JP_To_EN
