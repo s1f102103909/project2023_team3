@@ -180,10 +180,6 @@ def result(request):
                    'advice' : user.advise, 
                    "graph" : user.result_images
                 }
-        
-        #切り取ったサウンドフォルダを削除
-        #if os.path.isdir(audio_dir):
-            #shutil.rmtree(audio_dir)
 
         return render(request, 'interview/result.html',context)
     else:
