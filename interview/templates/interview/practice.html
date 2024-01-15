@@ -40,8 +40,7 @@
         display: flex;
       }
 
-      .practice,
-      .btn {
+      .practice {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -59,8 +58,7 @@
         background-color: #ffffff;
       }
 
-      .practice:hover,
-      .btn:hover {
+      .practice:hover {
         box-shadow: 0 0 #333;
         color: #fff;
         background-color: #333;
@@ -100,11 +98,26 @@
         align-self: flex-start;
       }
 
-      img {
+      #video {
         border-radius: 30px;
         margin: 20px;
         width: 600px;
         height: 400px;
+      }
+      .underButton {
+        display: flex;
+      }
+      .result {
+        margin-top: 5px;
+        margin-left: 50px;
+        display: inline-block;
+      }
+      .result img {
+        display: block;
+      }
+
+      .btn {
+        margin-left: 60px;
       }
     </style>
   </head>
@@ -124,13 +137,19 @@
               {% csrf_token %}
               <button type="button" class="practice">練習開始</button>
             </form>
-            <button type="button" class="btn">回答開始</button>
           </div>
           <div id="output" hidden></div>
           <div class="output-container"></div>
           <div class="response-container"></div>
           <div class="chatList"><div class="record"></div></div>
-          <button onclick="location.href='/result'">結果画面へ</button>
+          <div class="underButton">
+            <a href="/result" class="result">
+              <img width="120" src="/media/img/phone.png" alt="Image" />
+            </a>
+            <img width="95" class="btn" src="/media/img/mic1.png" alt="" />
+            <!--<button type="button" class="btn">回答開始</button>-->
+            <!--<button onclick="location.href='/result'">結果画面へ</button>-->
+          </div>
         </div>
       </main>
     </div>
@@ -171,7 +190,6 @@
           interimTranscript +
           "</i>";
       };
-
       startStopButton.addEventListener("click", () => {
         if (isListening) {
           // 音声認識を停止
