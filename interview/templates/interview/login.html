@@ -27,12 +27,52 @@
 <html lang="ja" dir="ltr">
 <head>
 <meta charset="utf-8">
-<title></title>
-<link rel="stylesheet" href='{% static "App_Folder_css/style.css" %}'/>
+<title>Login</title>
+<style>
+  .loginarea{
+    padding-top: 100px;
+  }
+  div.reg{
+    text-align: center;
+  }
+  table.reg_form{
+    margin: auto;
+    padding-top: 30px;
+    font-size: 20px;
+  }
+  .textbox {
+    width: 450px;
+    padding: 8px 10px;
+    margin-bottom: 20px;
+    border: 1px solid #565b5f;
+    border-radius: 13px;
+    color: #333;
+    font-size: 1em;
+    line-height: 1.5;
+  }
+
+  .textbox::placeholder {
+    color: #999;
+  }
+  .btn{
+    display: flex;
+    font-size: 20px;
+    justify-content: center;
+    align-items: center;
+    width: 470px;
+    margin:0 auto;
+    padding: 8px 10px;
+    line-height: 1.5;
+    border: none;
+    border-radius: 13px;
+    background: linear-gradient(to right,#4e41ea,#0D8DC4);
+    color: #ffffff;
+  }
+</style>
 
 </head>
 <body>
-<div class="loginarea">
+<div class="reg loginarea">
 <h1>ログイン画面</h1>
 
 <div class="reg">
@@ -41,12 +81,10 @@
 
     <table class="reg_form">
     <tr>
-    <td><label for="userid">ユーザーID:</label></td>
-    <td><input type="text" name="userid"></td>
+    <td><input type="text" name="userid" class="textbox" placeholder="ユーザーID"></td>
     </tr>
     <tr>
-    <td><label for="password">パスワード：</label></td>
-    <td><input type="password" name="password"></td>
+    <td><input type="password" name="password" class="textbox" placeholder="パスワード"></td>
     </tr>
     </table>
 
