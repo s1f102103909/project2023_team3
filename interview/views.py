@@ -54,6 +54,16 @@ audio_dir = "cutaudio"
 
 #home.htmlへの遷移
 def home(request):
+    if os.path.exists(video_filename): #output.mp4の削除
+        os.remove(video_filename)
+    if os.path.exists(audio_filename): #output_audio.wavの削除
+        os.remove(audio_filename)
+    if os.path.exists("main.mp4"): #main.mp4の削除
+        os.remove("main.mp4")
+    if os.path.exists("emotion_graph.png"): #emotion_graph.pngの削除
+        os.remove("emotion_graph.png")
+    if os.path.isdir(audio_dir): #cutaudioフォルダ削除
+            shutil.rmtree(audio_dir)
     return render(request, 'interview/home.html', {}) 
 
 #練習開始ボタンを押した時の挙動
