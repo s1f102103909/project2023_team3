@@ -65,7 +65,8 @@ def Login(request):
                 # ログイン
                 login(request,user)
                 # ホームページ遷移
-                return render(request, 'interview/home.html', {}) 
+                #return render(request, 'interview/home.html', {}) 
+                return HttpResponseRedirect(reverse('home'))
             else:
                 # アカウント利用不可
                 return HttpResponse("アカウントが有効ではありません")
@@ -79,6 +80,7 @@ def Login(request):
 #home.htmlへの遷移
 def home(request):
     return render(request, 'interview/home.html', {}) 
+
 
 #練習開始ボタンを押した時の挙動
 @csrf_exempt
