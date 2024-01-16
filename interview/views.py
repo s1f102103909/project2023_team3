@@ -200,7 +200,6 @@ def result(request):
         rec_flag = False
 
         interview_result = ChatGPT_to_Result(speechTexts,responseTexts)
-        #print(interview_result)
         score_point = interview_result.find("Score")
         Evaluation_point = interview_result.find("Evaluation")
         Advice_point = interview_result.find("Advice")

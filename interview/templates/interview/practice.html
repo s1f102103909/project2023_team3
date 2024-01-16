@@ -221,7 +221,7 @@
             />
             <!--マイクオン・オフ-->
             <!--<button type="button" class="btn">回答開始</button>-->
-            <img width="95" class="btn" src="/static/images/mic1.png" alt="" />
+            <img width="95" id="btn" class="btn" src="/static/images/mic2.png" alt="" />
           </div>
         </div>
       </main>
@@ -285,12 +285,14 @@
           recognition.stop();
           isListening = false;
           startStopButton.textContent = "回答開始";
+          document.getElementById("btn").src="/static/images/mic2.png";
         } else {
           // 音声認識を開始
           finalTranscript = "";
           recognition.start();
           isListening = true;
           startStopButton.textContent = "回答完了";
+          document.getElementById("btn").src="/static/images/mic1.png";
         }
       });
 
@@ -360,7 +362,7 @@
       });
 
       function toResult(text) {
-        return text.includes("終了");
+        return text.includes("終了") || text.includes("終わり");
       }
     </script>
   </body>
