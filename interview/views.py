@@ -28,7 +28,6 @@ import matplotlib.pyplot as plt
 import re
 import alkana
 import matplotlib
-
 from django.shortcuts import render
 # ログイン・ログアウト処理に利用
 from django.contrib.auth import authenticate, login
