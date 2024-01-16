@@ -122,6 +122,54 @@
       .btn {
         margin-left: 60px;
       }
+      #spinner {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        overflow: auto;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.8);
+      }
+      #spinner > div {
+        background-color: #ffffff;
+        height: 40px;
+        width: 6px;
+        display: inline-block;
+        -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+        animation: sk-stretchdelay 1.2s infinite ease-in-out;
+      }
+      #spinner .rect2 {
+        -webkit-animation-delay: -1.1s;
+        animation-delay: -1.1s;
+      }
+      #spinner .rect3 {
+        -webkit-animation-delay: -1.0s;
+        animation-delay: -1.0s;
+      }
+      #spinner .rect4 {
+        -webkit-animation-delay: -0.9s;
+        animation-delay: -0.9s;
+      }
+      #spinner .rect5 {
+        -webkit-animation-delay: -0.8s;
+        animation-delay: -0.8s;
+      }
+      @-webkit-keyframes sk-stretchdelay {
+        0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
+        20% { -webkit-transform: scaleY(1.0) }
+      }
+      @keyframes sk-stretchdelay {
+        0%, 40%, 100% {
+          transform: scaleY(0.4);
+          -webkit-transform: scaleY(0.4);
+        }  20% {
+          transform: scaleY(1.0);
+          -webkit-transform: scaleY(1.0);
+        }
+      }
     </style>
   </head>
   <body>
@@ -146,9 +194,10 @@
           <div class="response-container"></div>
           <div class="chatList"><div class="record"></div></div>
           <div class="underButton">
-            <a href="/result" class="result">
+            <button class="result"><img width="120" src="/media/img/phone.png" alt="Image" /></button>
+            <!--a href="/result" class="result">
               <img width="120" src="/media/img/phone.png" alt="Image" />
-            </a>
+            </a-->
             <img width="95" class="btn" src="/media/img/mic1.png" alt="" />
             <!--<button type="button" class="btn">回答開始</button>-->
             <!--<button onclick="location.href='/result'">結果画面へ</button>-->
@@ -156,12 +205,21 @@
         </div>
       </main>
     </div>
+    <!--ロード画面のやつ-->
+    <div id="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
     <script>
       //demoボタン設定
       const practice_demo = document.querySelector(".practice");
 
       //ボタン設定
       const startStopButton = document.querySelector(".btn");
+      const resultButton = document.querySelector(".result"); //結果画面へのボタン
       const output = document.querySelector("#output");
 
       //音声認識設定
@@ -193,6 +251,12 @@
           interimTranscript +
           "</i>";
       };
+
+      resultButton.addEventListener('click', function(){
+        document.getElementById("spinner").style.display = 'block';
+        window.location.href = "result";
+      });
+
       startStopButton.addEventListener("click", () => {
         if (isListening) {
           // 音声認識を停止
@@ -230,7 +294,8 @@
             responseContainer.scrollTop = responseContainer.scrollHeight;
             if (toResult(response.textContent)) {
               setTimeout(function () {}, 1000);
-              window.location.href = "result";
+              //window.location.href = "result";
+              resultButton.click();
             }
           }
         };

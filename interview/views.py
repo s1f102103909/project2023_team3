@@ -193,7 +193,7 @@ def result(request):
 
         return render(request, 'interview/result.html',context)
     else:
-        return render(request, 'interview/result.html',{})
+        return render(request, 'interview/error.html',{})
 
 #何かしらエラーが発生した時に、エラー画面へ遷移
 def error(request):
