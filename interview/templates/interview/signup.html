@@ -3,12 +3,96 @@
   <head>
     <meta charset="utf-8">
     <title>signup</title>
+    <style>
+      .loginarea{
+        padding-top: 100px;
+      }
+      div.reg{
+        text-align: center;
+      }
+      table.reg_form{
+        margin: auto;
+        padding-top: 30px;
+        font-size: 20px;
+      }
+      .textbox {
+        width: 450px;
+        padding: 8px 10px;
+        margin-bottom: 20px;
+        border: 1px solid #565b5f;
+        border-radius: 13px;
+        color: #333;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+    
+      .textbox::placeholder {
+        color: #999;
+      }
+      .boxname{
+        font-size: 16px;
+        color: #565b5f;
+      }
+      .btn{
+        display: flex;
+        font-size: 16px;
+        justify-content: center;
+        align-items: center;
+        width: 450px;
+        margin:0 auto;
+        margin-top: 20px;
+        padding: 8px 10px;
+        line-height: 1.5;
+        border: none;
+        border-radius: 13px;
+        background: linear-gradient(to right,#4e41ea,#0D8DC4);
+        color: #ffffff;
+      }
+      .attention{
+        font-size: 12px;
+        color: #565b5f
+      }
+    </style>
   </head>
   <body>
+    <div class="reg loginarea">
     <h1>サインアップ</h1>
+    </div>
     <form method="post">
+      {% csrf_token %}
+  
+      <table class="reg_form">
+      <tr>
+        <td><label for="username" class="boxname">ユーザー名</label></td>
+      </tr>
+      <tr>
+        <td><label class="attention">利用可能文字：半角アルファベット、半角英数字、@/./+/-/_で150字以内</label></td>
+      </tr>
+      <tr>
+      <td><input type="text" name="username" class="textbox" placeholder="ユーザーID"></td>
+      </tr>
+      <!--<tr>
+        <td><label for="email" class="boxname">メールアドレス</label></td>
+      </tr>
+      <tr>
+      <td><input type="text" name="email" class="textbox" placeholder="メールアドレス"></td>
+      </tr>-->
+      <tr>
+        <td><label for="password" class="boxname">パスワード</label></td>
+      </tr>
+      <tr>
+        <td><label class="attention">パスワードは最低8文字必要です</label></td>
+      </tr>
+      <tr>
+        <td><input type="password" name="password" class="textbox" placeholder="パスワード"></td>
+      </tr>
+      </table>
+  
+      <button type="submit" class="btn" value="signup">新規登録</button>
+   </form>
+    <!--<form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">ユーザー登録</button>
-    </form>
+    </form>-->
 </html>
