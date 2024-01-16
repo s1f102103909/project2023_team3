@@ -113,6 +113,7 @@
       .result {
         margin-top: 5px;
         margin-left: 60px;
+        height: 70px;
         display: inline-block;
       }
       .result img {
@@ -129,6 +130,7 @@
         right: 0;
         bottom: 0;
         left: 0;
+        padding-top: 200px;
         overflow: auto;
         text-align: center;
         background: rgba(0, 0, 0, 0.8);
@@ -149,8 +151,8 @@
         animation-delay: -1.1s;
       }
       #spinner .rect3 {
-        -webkit-animation-delay: -1.0s;
-        animation-delay: -1.0s;
+        -webkit-animation-delay: -1s;
+        animation-delay: -1s;
       }
       #spinner .rect4 {
         -webkit-animation-delay: -0.9s;
@@ -161,16 +163,25 @@
         animation-delay: -0.8s;
       }
       @-webkit-keyframes sk-stretchdelay {
-        0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
-        20% { -webkit-transform: scaleY(1.0) }
+        0%,
+        40%,
+        100% {
+          -webkit-transform: scaleY(0.4);
+        }
+        20% {
+          -webkit-transform: scaleY(1);
+        }
       }
       @keyframes sk-stretchdelay {
-        0%, 40%, 100% {
+        0%,
+        40%,
+        100% {
           transform: scaleY(0.4);
           -webkit-transform: scaleY(0.4);
-        }  20% {
-          transform: scaleY(1.0);
-          -webkit-transform: scaleY(1.0);
+        }
+        20% {
+          transform: scaleY(1);
+          -webkit-transform: scaleY(1);
         }
       }
     </style>
@@ -197,13 +208,20 @@
           <div class="response-container"></div>
           <div class="chatList"><div class="record"></div></div>
           <div class="underButton">
-            <button class="result"><img width="120" src="/media/img/phone.png" alt="Image" /></button>
+            <!--結果画面へ-->
             <!--a href="/result" class="result">
               <img width="120" src="/media/img/phone.png" alt="Image" />
             </a-->
-            <img width="95" class="btn" src="/media/img/mic1.png" alt="" />
-            <!--<button type="button" class="btn">回答開始</button>-->
             <!--<button onclick="location.href='/result'">結果画面へ</button>-->
+            <img
+              width="120"
+              class="result"
+              src="/media/img/phone.png"
+              alt="Image"
+            />
+            <!--マイクオン・オフ-->
+            <!--<button type="button" class="btn">回答開始</button>-->
+            <img width="95" class="btn" src="/media/img/mic1.png" alt="" />
           </div>
         </div>
       </main>
@@ -256,8 +274,8 @@
           "</i>";
       };
 
-      resultButton.addEventListener('click', function(){
-        document.getElementById("spinner").style.display = 'block';
+      resultButton.addEventListener("click", function () {
+        document.getElementById("spinner").style.display = "block";
         window.location.href = "result";
       });
 
