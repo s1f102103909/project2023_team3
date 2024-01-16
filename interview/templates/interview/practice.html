@@ -113,6 +113,7 @@
       .result {
         margin-top: 5px;
         margin-left: 60px;
+        height: 70px;
         display: inline-block;
       }
       .result img {
@@ -121,6 +122,67 @@
 
       .btn {
         margin-left: 60px;
+      }
+      #spinner {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding-top: 200px;
+        overflow: auto;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.8);
+      }
+      #spinner > div {
+        background-color: #ffffff;
+        height: 40px;
+        width: 6px;
+        display: inline-block;
+        -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+        animation: sk-stretchdelay 1.2s infinite ease-in-out;
+      }
+      #spinner > p {
+        color: #ffffff;
+      }
+      #spinner .rect2 {
+        -webkit-animation-delay: -1.1s;
+        animation-delay: -1.1s;
+      }
+      #spinner .rect3 {
+        -webkit-animation-delay: -1s;
+        animation-delay: -1s;
+      }
+      #spinner .rect4 {
+        -webkit-animation-delay: -0.9s;
+        animation-delay: -0.9s;
+      }
+      #spinner .rect5 {
+        -webkit-animation-delay: -0.8s;
+        animation-delay: -0.8s;
+      }
+      @-webkit-keyframes sk-stretchdelay {
+        0%,
+        40%,
+        100% {
+          -webkit-transform: scaleY(0.4);
+        }
+        20% {
+          -webkit-transform: scaleY(1);
+        }
+      }
+      @keyframes sk-stretchdelay {
+        0%,
+        40%,
+        100% {
+          transform: scaleY(0.4);
+          -webkit-transform: scaleY(0.4);
+        }
+        20% {
+          transform: scaleY(1);
+          -webkit-transform: scaleY(1);
+        }
       }
     </style>
   </head>
@@ -146,15 +208,32 @@
           <div class="response-container"></div>
           <div class="chatList"><div class="record"></div></div>
           <div class="underButton">
-            <a href="/result" class="result">
+            <!--結果画面へ-->
+            <!--a href="/result" class="result">
               <img width="120" src="/media/img/phone.png" alt="Image" />
-            </a>
-            <img width="95" class="btn" src="/media/img/mic1.png" alt="" />
-            <!--<button type="button" class="btn">回答開始</button>-->
+            </a-->
             <!--<button onclick="location.href='/result'">結果画面へ</button>-->
+            <img
+              width="120"
+              class="result"
+              src="/static/images/phone.png"
+              alt="Image"
+            />
+            <!--マイクオン・オフ-->
+            <!--<button type="button" class="btn">回答開始</button>-->
+            <img width="95" class="btn" src="/static/images/mic1.png" alt="" />
           </div>
         </div>
       </main>
+    </div>
+    <!--ロード画面のやつ-->
+    <div id="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+      <p>採点中...</p>
     </div>
     <script>
       //demoボタン設定
@@ -162,6 +241,7 @@
 
       //ボタン設定
       const startStopButton = document.querySelector(".btn");
+      const resultButton = document.querySelector(".result"); //結果画面へのボタン
       const output = document.querySelector("#output");
 
       //音声認識設定
@@ -193,6 +273,12 @@
           interimTranscript +
           "</i>";
       };
+
+      resultButton.addEventListener("click", function () {
+        document.getElementById("spinner").style.display = "block";
+        window.location.href = "result";
+      });
+
       startStopButton.addEventListener("click", () => {
         if (isListening) {
           // 音声認識を停止
@@ -230,7 +316,8 @@
             responseContainer.scrollTop = responseContainer.scrollHeight;
             if (toResult(response.textContent)) {
               setTimeout(function () {}, 1000);
-              window.location.href = "result";
+              //window.location.href = "result";
+              resultButton.click();
             }
           }
         };

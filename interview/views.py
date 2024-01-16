@@ -28,16 +28,34 @@ import matplotlib.pyplot as plt
 import re
 import alkana
 import matplotlib
-
 from django.shortcuts import render
-from django.views.generic import TemplateView #テンプレートタグ
-#from .forms import AccountForm, AddAccountForm #ユーザーアカウントフォーム
-
 # ログイン・ログアウト処理に利用
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
+
+# Create your views here.
+# global変数
+API_KEY_INIAD ="7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
+API_BASE = "https://api.openai.iniad.org/api/v1"
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
+video_filename = 'output.mp4'             #動画ファイル名(音無し)
+fps = 0.0                                 #fpsの初期設定
+width = 0                                 #カメラの幅
+height = 0                                #カメラの縦
+out = cv2.VideoWriter()                   #フレームを書き込む変数の初期化
+audio_filename = 'output_audio.wav'       #音声ファイル名
+rec_sig = []                              #音声フレームを格納する変数
+rec_flag = False                          #撮影中かどうか
+
+speechTexts = [] # 音声合成したテキストを格納する変数
+responseTexts = [] # 返答テキストを格納する変数
+
+start_time = 0.0    #録音開始時刻の初期設定
+user_end_time = []  #ユーザーの喋り終わりの時間の配列
+voicebox_end_time = []  #VoiceBoxの喋り終わりの時間の配列
+
+audio_dir = "cutaudio"
 
 #ログイン
 def Login(request):
@@ -69,33 +87,6 @@ def Login(request):
     # GET
     else:
         return render(request, 'interview/login.html')
-
-#home.htmlへの遷移
-def home(request):
-    return render(request, 'interview/home.html', {}) 
-
-# Create your views here.
-# global変数
-API_KEY_INIAD ="7mEzWE1lX1ydPML-R6XoIyHY3COyv4opLtNNdKTvrGfOcfITVbSVovOVaRpKORvGcl4OTip5DQweV_BAzK3L9dw"
-API_BASE = "https://api.openai.iniad.org/api/v1"
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 動画コーデックの設定（XVIDは一般的なコーデック）
-video_filename = 'output.mp4'             #動画ファイル名(音無し)
-fps = 0.0                                 #fpsの初期設定
-width = 0                                 #カメラの幅
-height = 0                                #カメラの縦
-out = cv2.VideoWriter()                   #フレームを書き込む変数の初期化
-audio_filename = 'output_audio.wav'       #音声ファイル名
-rec_sig = []                              #音声フレームを格納する変数
-rec_flag = False                          #撮影中かどうか
-
-speechTexts = [] # 音声合成したテキストを格納する変数
-responseTexts = [] # 返答テキストを格納する変数
-
-start_time = 0.0    #録音開始時刻の初期設定
-user_end_time = []  #ユーザーの喋り終わりの時間の配列
-voicebox_end_time = []  #VoiceBoxの喋り終わりの時間の配列
-
-audio_dir = "cutaudio"
 
 #home.htmlへの遷移
 def home(request):
@@ -238,7 +229,7 @@ def result(request):
 
         return render(request, 'interview/result.html',context)
     else:
-        return render(request, 'interview/result.html',{})
+        return render(request, 'interview/error.html',{})
 
 #何かしらエラーが発生した時に、エラー画面へ遷移
 def error(request):
