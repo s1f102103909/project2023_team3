@@ -67,7 +67,7 @@ def JP_To_EN(text):
     sourse_lang = 'JA'
     traget_lang = 'EN-US' # EN-GB
 
-    translator = deepl.Translator('915e4495-52d5-1b86-a1f3-0d620ac62c20:fx')
+    translator = deepl.Translator('4c814163-d892-a5f0-91de-145d010252e7:fx')
 
     result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
     
@@ -78,7 +78,7 @@ def EN_To_JP(text):
     sourse_lang = 'EN'
     traget_lang = 'JA'
 
-    translator = deepl.Translator('915e4495-52d5-1b86-a1f3-0d620ac62c20:fx')
+    translator = deepl.Translator('4c814163-d892-a5f0-91de-145d010252e7:fx')
 
     result = translator.translate_text(text, source_lang=sourse_lang,target_lang=traget_lang)
     
