@@ -1,18 +1,326 @@
-<html lang="ja"><head><meta charset="utf-8"></head>
-  <body>
-    <h1>Home</h1>
+{% load static %}
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <script
+      src="https://code.jquery.com/jquery-2.1.3.min.js"
+      integrity="sha256-ivk71nXhz9nsyFDoYoGf2sbjrR9ddh+XDkCcfZxjvcM="
+      crossorigin="anonymous"
+    ></script>
+    <script src="{% static 'interview/js/base.js' %}"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css"
+      integrity="sha384-fFxL8wXRpg9gVqGpY+URMtLr3fLL0WBbo4NBQ+IWwMDYjIjI5VQ46XlJm5+BUlXJ"
+      crossorigin="anonymous"
+    />
+    <link href="{% static 'interview/css/base.css' %}" rel="stylesheet" />
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300);
+      body {
+        padding: 0;
+        margin: 0;
+        background: #fff;
+      }
+      header {
+        top: 0;
+        width: 100%;
+        text-align: center;
+        height: 70px;
+        background-color: white;
+        border-bottom: 2px solid rgb(56, 56, 69);
+        border-radius: 0px 0px 100px 0px;
+        font: 300 40px "open sans", sans-serif;
+        margin-bottom: 5%;
+      }
+      a {
+        text-decoration: none;
+      }
 
+      .logout {
+        margin-right: 35px;
+        text-align: end;
+        font-size: 9px;
+      }
+      svg {
+        color: rgb(10, 10, 179);
+        margin-bottom: 0;
+      }
+      .tabs {
+        width: 80%;
+        margin: 2px auto;
+        position: relative;
+      }
+      .tab-buttons span {
+        font: 400 14px "open sans", sans-serif;
+        color: #333;
+        background: white;
+        cursor: pointer;
+        border-bottom: 2px solid #ddd;
+        display: block;
+        width: 20%;
+        float: left;
+        text-align: center;
+        height: 80px;
+        line-height: 0px;
+      }
+      .tab-content {
+        padding: 3px;
+        background: white;
+        display: inline-block;
+        font: 400 13px "open sans", sans-serif;
+        color: #333;
+      }
+      .con1 {
+        display: flex;
+      }
+      .con {
+        border: rgb(14, 14, 49) solid 2px;
+        height: 100px;
+        width: 500px;
+        margin: 5%;
+      }
+
+      span {
+        border: blue;
+      }
+
+      span div {
+        top: 0;
+      }
+
+      .con1-2 {
+        text-align: center;
+        width: 100%;
+      }
+      .con1-2 a {
+        color: #fff;
+      }
+
+      .content1 h2 {
+        margin-left: 80%;
+        width: 400px;
+        text-align: center;
+        font-size: 40px;
+        color: #fff;
+        background-color: rgb(2, 2, 88);
+        border-radius: 0px 20px 20px 0px;
+      }
+
+      .content2 h2 {
+        margin-left: 80%;
+        width: 400px;
+        text-align: center;
+        font-size: 40px;
+        color: #fff;
+        background-color: rgb(2, 2, 88);
+        border-radius: 0px 20px 20px 0px;
+      }
+
+      #lamp {
+        width: 20%;
+        height: 2px;
+        background: blue;
+        display: block;
+        position: absolute;
+        top: 80px;
+        transition: all 0.3s ease-in;
+        -o-transition: all 0.3s ease-in;
+        -webkit-transition: all 0.3s ease-in;
+        -moz-transition: all 0.3s ease-in;
+      }
+
+      #lamp.content1 {
+        left: 0;
+        transition: all 0.3s ease-in;
+        -o-transition: all 0.3s ease-in;
+        -webkit-transition: all 0.3s ease-in;
+        -moz-transition: all 0.3s ease-in;
+      }
+      #lamp.content2 {
+        left: 20%;
+        transition: all 0.3s ease-in;
+        -o-transition: all 0.3s ease-in;
+        -webkit-transition: all 0.3s ease-in;
+        -moz-transition: all 0.3s ease-in;
+      }
+      #lamp.content3 {
+        left: 40%;
+        transition: all 0.3s ease-in;
+        -o-transition: all 0.3s ease-in;
+        -webkit-transition: all 0.3s ease-in;
+        -moz-transition: all 0.3s ease-in;
+      }
+      #lamp.content4 {
+        left: 60%;
+        transition: all 0.3s ease-in;
+        -o-transition: all 0.3s ease-in;
+        -webkit-transition: all 0.3s ease-in;
+        -moz-transition: all 0.3s ease-in;
+      }
+      #lamp.content5 {
+        left: 80%;
+        transition: all 0.3s ease-in;
+        -o-transition: all 0.3s ease-in;
+        -webkit-transition: all 0.3s ease-in;
+        -moz-transition: all 0.3s ease-in;
+      }
+    </style>
+  </head>
+
+  <body>
     {% if user.is_authenticated %}
-    <p>Hi {{ user.username }}!</p>
-    <a href="{% url 'practice' %}">面接練習</a>
-    <br>
-    <a href="{% url 'score'%}" >スコア確認</a>
-    <br>
-    <a href="{% url 'logout' %}">logout</a>
+    <header>
+      <div class="logout">
+        <a href="{% url 'logout' %}"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="35"
+            height="35"
+            fill="currentColor"
+            class="bi bi-escape"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M8.538 1.02a.5.5 0 1 0-.076.998 6 6 0 1 1-6.445 6.444.5.5 0 0 0-.997.076A7 7 0 1 0 8.538 1.02Z"
+            />
+            <path
+              d="M7.096 7.828a.5.5 0 0 0 .707-.707L2.707 2.025h2.768a.5.5 0 1 0 0-1H1.5a.5.5 0 0 0-.5.5V5.5a.5.5 0 0 0 1 0V2.732l5.096 5.096Z"
+            />
+          </svg>
+          <div>ログアウト</div></a
+        >
+      </div>
+    </header>
+    <!---<p>Hi {{ user.username }}!</p>-->
+    <div class="tabs">
+      <div class="tab-buttons">
+        <span class="content1">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            fill="currentColor"
+            class="bi bi-pen-fill"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z"
+            />
+          </svg>
+          <p>練習</p>
+        </span>
+        <span class="content2"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            fill="currentColor"
+            class="bi bi-file-earmark-bar-graph-fill"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zm.5 10v-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm-2.5.5a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1zm-3 0a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-1z"
+            />
+          </svg>
+          <p>成績</p></span
+        >
+        <span class="content3"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            fill="currentColor"
+            class="bi bi-file-earmark-text-fill"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1h-4z"
+            />
+          </svg>
+          <p>問題</p>
+        </span>
+        <span class="content4"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            fill="currentColor"
+            class="bi bi-bell-fill"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"
+            />
+          </svg>
+          <p>お知らせ</p></span
+        >
+        <span class="content5">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            fill="currentColor"
+            class="bi bi-person-circle"
+            viewBox="0 0 16 16"
+          >
+            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+            <path
+              fill-rule="evenodd"
+              d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
+            />
+          </svg>
+          <p>アカウント</p>
+        </span>
+        <div id="lamp" class="content1"></div>
+      </div>
+
+      <div class="tab-content">
+        <div class="content1">
+          <div class="con1-2">
+            <h2><a href="{% url 'practice' %}">練習開始</a></h2>
+          </div>
+        </div>
+
+        <div class="content2">
+          <div>
+            スコア確認ボタンから過去の面接結果を確認しよう！
+            <h2><a href="{% url 'score'%}">スコア確認</a></h2>
+          </div>
+        </div>
+
+        <div class="content3">
+          This is the content of 3 container.This will be open when button 3 is
+          clicked.This is the content of 3 container.This will be open when
+          button 3 is clicked.This is the content of 3 container.This will be
+          open when button 3 is clicked.
+        </div>
+        <div class="content4"></div>
+        <div class="content5">
+          <p>Hi {{ user.username }}!</p>
+        </div>
+      </div>
+    </div>
+    <div class="credit"></div>
     {% else %}
     <p>You are not logged in.</p>
     <p><a href="{% url 'login' %}">login</a></p>
     <p><a href="{% url 'signup' %}">新規登録はこちら</a></p>
     {% endif %}
-</body>
+  </body>
+  <script>
+    $(".tab-content>div").hide();
+    $(".tab-content>div").first().slideDown();
+    $(".tab-buttons span").click(function () {
+      var thisclass = $(this).attr("class");
+      $("#lamp").removeClass().addClass("#lamp").addClass(thisclass);
+      $(".tab-content>div").each(function () {
+        if ($(this).hasClass(thisclass)) {
+          $(this).fadeIn(800);
+        } else {
+          $(this).hide();
+        }
+      });
+    });
+  </script>
 </html>

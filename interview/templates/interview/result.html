@@ -1,23 +1,124 @@
 {% load static %}
 <html lang="ja">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>score</title>
+    <style>
+      header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        margin-bottom: 5px;
+        text-align: center;
+        height: 70px;
+        background-color: white;
+        border-bottom: 2px solid rgb(56, 56, 69);
+        border-radius: 0px 0px 100px 0px;
+        font: 300 40px "open sans", sans-serif;
+        z-index: 3;
+      }
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .score-container {
+        margin-top: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+
+      .detail {
+        margin: 20px;
+        width: 400px;
+        display: block;
+      }
+      .result-box {
+        text-align: center;
+        padding: 20px;
+      }
+
+      .result-detail {
+        display: flex;
+      }
+      .score {
+        display: flex;
+        font-weight: bold;
+        color: #3498db;
+      }
+      #txt {
+        margin-top: 80px;
+        margin-bottom: 10px;
+        font-size: 30px;
+      }
+      #num {
+        margin-top: 0;
+        margin-left: 30px;
+        margin-bottom: 60px;
+        font-size: 120px;
+      }
+
+      .graph {
+        margin-top: 30px;
+      }
+      .graph img {
+        width: 600;
+        height: 350px;
+      }
+
+      h3 {
+        position: relative;
+        color: white;
+        background: #6684f1;
+        line-height: 1.4;
+        padding: 0.5em 0.5em 0.5em 1.8em;
+        z-index: 2;
+      }
+
+      h3:before {
+        font-family: "Font Awesome 5 Free";
+        content: "\f14a";
+        font-weight: 900;
+        position: absolute;
+        left: 0.5em;
+        z-index: 2;
+      }
+    </style>
   </head>
   <body>
-    <p>{{ user.username }}さん</p>
-    <p>今回の結果です。</p>
-    <p>スコア：{{ score }}</p>
-    <p>評価：{{ evaluation }}</p>
-    <p>アドバイス：{{ advice }}</p>
+    <header>LOGO</header>
+    <div class="score-container">
+      <div class="result-box">
+        <p>{{ user.username }}さんの今回の結果は…</p>
+        <div class="score">
+          <p id="txt">スコア：</p>
+          <p id="num">{{ score }}</p>
+        </div>
+      </div>
+      <div class="result-detail">
+        <div class="detail">
+          <h3>評価</h3>
+          <p>{{ evaluation }}</p>
+          <br />
+          <h3>アドバイス</h3>
+          <p>{{ advice }}</p>
+        </div>
 
-    {% if graph %}
-    <p>今回の{{ user.username }}さんの音声感情のグラフです。</p>
-      <img src="{{ graph.url }}" alt="Image">
-    {% else %}
-    <p>音声が読み取れませんでした。</p>
-    {% endif %}
-
-    <a href="{% url 'home' %}">ホーム画面へ</a>
+        <div class="graph">
+          {% if graph %}
+          <h3>グラフ</h3>
+          <p>今回の{{ user.username }}さんの音声感情のグラフです。</p>
+          <img src="{{ graph.url }}" alt="Image" />
+          {% else %}
+          <p>音声が読み取れませんでした。</p>
+          {% endif %}
+          <a href="{% url 'home' %}">ホーム画面へ</a>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

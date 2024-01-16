@@ -1,81 +1,218 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
     <title>Document</title>
-</head>
-<body>
-  <form method="POST">
-    {% csrf_token %}
-    <button type="button" class="practice">練習開始</button>
-  </form>
-  <br>
-  <br>
-  <img id="video" src="{% url 'camera_stream' %}" width="810" height="500">
-  <br>
-  <main>
-    <button type="button" class="btn">回答開始</button>
-    <br>
-    <button onclick="location.href='/result'">結果画面へ</button>
-    <div id="output"></div>
-    <div class="output-container"></div>
-    <div class="response-container"></div>
-    <div class="record"></div>
-  </main>
-  <script>
-    //demoボタン設定
-    const practice_demo = document.querySelector(".practice");
+    <style>
+      header {
+        top: 0;
+        width: 100%;
+        margin-bottom: 5px;
+        text-align: center;
+        height: 70px;
+        background-color: white;
+        border-bottom: 2px solid rgb(56, 56, 69);
+        border-radius: 0px 0px 100px 0px;
+        font: 300 40px "open sans", sans-serif;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+        height: 100vh;
+      }
 
-    //ボタン設定
-    const startStopButton = document.querySelector(".btn");
-    const output = document.querySelector("#output");
+      main {
+        display: flex;
+      }
+      .main {
+        display: flex;
+      }
+      .head-btn {
+        display: flex;
+      }
 
-    //音声認識設定
-    SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
-    let recognition = new SpeechRecognition();
-    recognition.lang = "ja";
-    recognition.interimResults = true;
-    recognition.continuous = true;
-    
-    //停止、スタート
-    let isListening = false;
+      .practice {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        text-decoration: none;
+        color: #1b225c;
+        font-size: 18px;
+        border-radius: 0px;
+        width: 200px;
+        height: 40px;
+        font-weight: bold;
+        border: 2px solid #1b225c;
+        transition: 0.3s;
+        box-shadow: 5px 5px 0px 0px #1b225c;
+        background-color: #ffffff;
+      }
 
-    let finalTranscript = ''; // 確定した(黒の)認識結果
+      .practice:hover {
+        box-shadow: 0 0 #1b225c;
+        color: #fff;
+        background-color: #1b225c;
+      }
 
-    //音声認識イベント
-    recognition.onresult = (event) => {
-      let interimTranscript = ''; // 暫定(灰色)の認識結果
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        let transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript;
-        } else {
-          interimTranscript = transcript;
+      .chatList {
+        display: block;
+        align-items: center;
+        justify-content: center;
+        max-width: 500px;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .record {
+        max-width: 500px;
+        padding: 5px;
+        overflow-y: auto;
+        height: 380px;
+      }
+
+      .message {
+        margin-bottom: 10px;
+        padding: 6px;
+        border-radius: 5px;
+      }
+      .user-message {
+        padding-left: 10px;
+        margin-left: 20%;
+        background-color: #a6e1fa;
+        align-self: flex-end;
+      }
+
+      .other-message {
+        margin-right: 20%;
+        background-color: #cdcaca;
+        align-self: flex-start;
+      }
+
+      #video {
+        border-radius: 30px;
+        margin: 20px 40px 20px 20px;
+        width: 700px;
+        height: 450px;
+        border: solid 2px #1b225c;
+      }
+      .underButton {
+        display: flex;
+      }
+      .result {
+        margin-top: 5px;
+        margin-left: 60px;
+        display: inline-block;
+      }
+      .result img {
+        display: block;
+      }
+
+      .btn {
+        margin-left: 60px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>LOGO</header>
+    <div class="main">
+      <img
+        id="video"
+        src="{% url 'camera_stream' %}"
+        width="810"
+        height="500"
+      />
+      <main>
+        <div class="main2">
+          <div class="head-btn">
+            <form method="POST">
+              {% csrf_token %}
+              <button type="button" class="practice">練習開始</button>
+            </form>
+          </div>
+          <div id="output" hidden></div>
+          <div class="output-container"></div>
+          <div class="response-container"></div>
+          <div class="chatList"><div class="record"></div></div>
+          <div class="underButton">
+            <a href="/result" class="result">
+              <img width="120" src="/media/img/phone.png" alt="Image" />
+            </a>
+            <img width="95" class="btn" src="/media/img/mic1.png" alt="" />
+            <!--<button type="button" class="btn">回答開始</button>-->
+            <!--<button onclick="location.href='/result'">結果画面へ</button>-->
+          </div>
+        </div>
+      </main>
+    </div>
+    <script>
+      //demoボタン設定
+      const practice_demo = document.querySelector(".practice");
+
+      //ボタン設定
+      const startStopButton = document.querySelector(".btn");
+      const output = document.querySelector("#output");
+
+      //音声認識設定
+      SpeechRecognition = webkitSpeechRecognition || SpeechRecognition;
+      let recognition = new SpeechRecognition();
+      recognition.lang = "ja";
+      recognition.interimResults = true;
+      recognition.continuous = true;
+
+      //停止、スタート
+      let isListening = false;
+
+      let finalTranscript = ""; // 確定した(黒の)認識結果
+
+      //音声認識イベント
+      recognition.onresult = (event) => {
+        let interimTranscript = ""; // 暫定(灰色)の認識結果
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          let transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript = transcript;
+          }
         }
-      }
-      output.innerHTML = finalTranscript + '<i style="color:#ddd;">' + interimTranscript + '</i>';
+        output.innerHTML =
+          finalTranscript +
+          '<i style="color:#ddd;">' +
+          interimTranscript +
+          "</i>";
       };
+      startStopButton.addEventListener("click", () => {
+        if (isListening) {
+          // 音声認識を停止
+          recognition.stop();
+          isListening = false;
+          startStopButton.textContent = "回答開始";
+        } else {
+          // 音声認識を開始
+          finalTranscript = "";
+          recognition.start();
+          isListening = true;
+          startStopButton.textContent = "回答完了";
+        }
+      });
 
-    startStopButton.addEventListener("click", () => {
-      if (isListening) {
-        // 音声認識を停止
-        recognition.stop();
-        isListening = false;
-        startStopButton.textContent = "回答開始";
-      } else {
-        // 音声認識を開始
-        finalTranscript = '';
-        recognition.start();
-        isListening = true;
-        startStopButton.textContent = "回答完了";
-      }
-    });
- 
-    const sendText = (transcript) => {
+      const sendText = (transcript) => {
         // CSRF Tokenを取得
-        let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        let csrftoken = document.querySelector(
+          "[name=csrfmiddlewaretoken]"
+        ).value;
 
         // Ajaxリクエストを作成してテキストを送信
         let xhr = new XMLHttpRequest();
@@ -88,10 +225,11 @@
             const responseContainer = document.querySelector(".record");
             const response = document.createElement("div");
             response.textContent = JSON.parse(xhr.responseText).message;
+            response.classList.add("message", "other-message");
             responseContainer.appendChild(response);
-            if (toResult(response.textContent)){
-              setTimeout(function () {
-              }, 1000);
+            responseContainer.scrollTop = responseContainer.scrollHeight;
+            if (toResult(response.textContent)) {
+              setTimeout(function () {}, 1000);
               window.location.href = "result";
             }
           }
@@ -99,39 +237,44 @@
         xhr.send(JSON.stringify({ text: transcript }));
       };
 
-    recognition.onend = () => {
-      const transcript = document.querySelector("#output").textContent;
-      const outputcontainer = document.querySelector(".record");
-      const response = document.createElement("div");
-      response.textContent = transcript;
-      outputcontainer.appendChild(response);
-      sendText(transcript);
-    };
-
-    practice_demo.addEventListener("click", () => {
-      let csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-      let xhr = new XMLHttpRequest();
-      xhr.open("POST", "/practice", true);
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.setRequestHeader("X-CSRFToken", csrftoken);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-          const responseContainer = document.querySelector(".record");
-          const response = document.createElement("div");
-          response.textContent = JSON.parse(xhr.responseText).message;
-          responseContainer.appendChild(response);
-        }
+      recognition.onend = () => {
+        const transcript = document.querySelector("#output").textContent;
+        const outputcontainer = document.querySelector(".record");
+        const response = document.createElement("div");
+        response.textContent = transcript;
+        response.classList.add("message", "user-message");
+        outputcontainer.appendChild(response);
+        outputcontainer.scrollTop = outputcontainer.scrollHeight;
+        sendText(transcript);
       };
-      xhr.send(JSON.stringify({ text: finalTranscript })); //適当のテキストを送信
-      //practice_demo.style.display = "none";  // 練習開始デモボタンを非表示に
-      practice_demo.disabled = true;  // 練習開始デモボタンを無効化
-    });
 
-    function toResult(text){
-      return text.includes("終了");
-    }
+      practice_demo.addEventListener("click", () => {
+        let csrftoken = document.querySelector(
+          "[name=csrfmiddlewaretoken]"
+        ).value;
 
-  </script>
-</body>
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "/practice", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+            const responseContainer = document.querySelector(".record");
+            const response = document.createElement("div");
+            response.textContent = JSON.parse(xhr.responseText).message;
+            response.classList.add("message", "other-message");
+            responseContainer.appendChild(response);
+            responseContainer.scrollTop = responseContainer.scrollHeight;
+          }
+        };
+        xhr.send(JSON.stringify({ text: finalTranscript })); //適当のテキストを送信
+        //practice_demo.style.display = "none";  // 練習開始デモボタンを非表示に
+        practice_demo.disabled = true; // 練習開始デモボタンを無効化
+      });
+
+      function toResult(text) {
+        return text.includes("終了");
+      }
+    </script>
+  </body>
 </html>
