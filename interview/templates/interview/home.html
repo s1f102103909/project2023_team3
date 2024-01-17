@@ -33,11 +33,18 @@
         font: 300 40px "open sans", sans-serif;
         margin-bottom: 5%;
       }
+      .top {
+        display: flex;
+      }
+      .top img {
+        margin-left: 650px;
+      }
       a {
         text-decoration: none;
       }
 
       .logout {
+        margin-left: 600px;
         margin-right: 35px;
         text-align: end;
         font-size: 9px;
@@ -171,6 +178,8 @@
   <body>
     {% if user.is_authenticated %}
     <header>
+      <div class="top">
+      <img width="100px" src="/static/images/intvu_logo.png" alt="">
       <div class="logout">
         <a href="{% url 'logout' %}"
           ><svg
@@ -191,6 +200,7 @@
           <div>ログアウト</div></a
         >
       </div>
+     </div>
     </header>
     <!---<p>Hi {{ user.username }}!</p>-->
     <div class="tabs">
