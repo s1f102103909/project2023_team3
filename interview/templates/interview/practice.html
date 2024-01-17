@@ -226,7 +226,7 @@
               width="88"
               id="btn"
               class="btn"
-              src="/static/images/mic2.png"
+              src="/static/images/micON.png"
               alt=""
             />
           </div>
@@ -292,14 +292,14 @@
           recognition.stop();
           isListening = false;
           startStopButton.textContent = "回答開始";
-          document.getElementById("btn").src = "/static/images/mic2.png";
+          document.getElementById("btn").src = "/static/images/micON.png";
         } else {
           // 音声認識を開始
           finalTranscript = "";
           recognition.start();
           isListening = true;
           startStopButton.textContent = "回答完了";
-          document.getElementById("btn").src = "/static/images/mic1.png";
+          document.getElementById("btn").src = "/static/images/micOFF.png";
         }
       });
 
