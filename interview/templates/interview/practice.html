@@ -46,22 +46,22 @@
         justify-content: center;
         line-height: 1;
         text-decoration: none;
-        color: #1b225c;
+        color: #4e41ea;
         font-size: 18px;
         border-radius: 0px;
         width: 200px;
         height: 40px;
         font-weight: bold;
-        border: 2px solid #1b225c;
+        border: 1px solid #4239a0;
         transition: 0.3s;
-        box-shadow: 5px 5px 0px 0px #1b225c;
+        box-shadow: 5px 5px 0px 0px #4e41ea;
         background-color: #ffffff;
       }
 
       .practice:hover {
-        box-shadow: 0 0 #1b225c;
+        box-shadow: 0 0 #4e41ea;
         color: #fff;
-        background-color: #1b225c;
+        background: linear-gradient(#4e41ea, #0d8dc4);
       }
 
       .chatList {
@@ -121,6 +121,7 @@
       }
 
       .btn {
+        margin-top: 3px;
         margin-left: 60px;
       }
       #spinner {
@@ -221,7 +222,13 @@
             />
             <!--マイクオン・オフ-->
             <!--<button type="button" class="btn">回答開始</button>-->
-            <img width="95" id="btn" class="btn" src="/static/images/mic2.png" alt="" />
+            <img
+              width="88"
+              id="btn"
+              class="btn"
+              src="/static/images/mic2.png"
+              alt=""
+            />
           </div>
         </div>
       </main>
@@ -285,14 +292,14 @@
           recognition.stop();
           isListening = false;
           startStopButton.textContent = "回答開始";
-          document.getElementById("btn").src="/static/images/mic2.png";
+          document.getElementById("btn").src = "/static/images/mic2.png";
         } else {
           // 音声認識を開始
           finalTranscript = "";
           recognition.start();
           isListening = true;
           startStopButton.textContent = "回答完了";
-          document.getElementById("btn").src="/static/images/mic1.png";
+          document.getElementById("btn").src = "/static/images/mic1.png";
         }
       });
 
