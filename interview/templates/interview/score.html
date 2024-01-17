@@ -1,12 +1,27 @@
 {% load static %}
 <html lang="ja">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>score</title>
+    <style>
+      header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        margin-bottom: 5px;
+        text-align: center;
+        height: 70px;
+        background-color: white;
+        border-bottom: 2px solid rgb(56, 56, 69);
+        border-radius: 0px 0px 100px 0px;
+        font: 300 40px "open sans", sans-serif;
+        z-index: 3;
+      }
+    </style>
   </head>
   <body>
-    <p>{{ user.username }}さんの成績です。</p>
-    
+    <header>LOGO</header>
+    <div></div>
     {% if score %}
     <p>前回の結果です。</p>
     <p>スコア：{{ score }}</p>
@@ -14,20 +29,16 @@
     <p>アドバイス：{{ advice }}</p>
     {% else %}
     <p>面接練習を行なっていません。</p>
-    {% endif %}
-
-    {% if video %}
+    {% endif %} {% if video %}
     <p>前回の面接動画です。</p>
     <video controls width="600" height="400">
-      <source src="{{ video.url }}" type="{{ video.content_type }}">
+      <source src="{{ video.url }}" type="{{ video.content_type }}" />
     </video>
     {% else %}
     <p>面接動画がありません。</p>
-    {% endif %}
-
-    {% if graph %}
+    {% endif %} {% if graph %}
     <p>前回の面接の音声感情のグラフです。</p>
-      <img src="{{ graph.url }}" alt="Image">
+    <img src="{{ graph.url }}" alt="Image" />
     {% else %}
     <p>音声感情のグラフはありません。</p>
     {% endif %}
