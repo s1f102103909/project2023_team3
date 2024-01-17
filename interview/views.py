@@ -200,7 +200,6 @@ def result(request):
         rec_flag = False
 
         interview_result = ChatGPT_to_Result(speechTexts,responseTexts)
-        #print(interview_result)
         score_point = interview_result.find("Score")
         Evaluation_point = interview_result.find("Evaluation")
         Advice_point = interview_result.find("Advice")
@@ -419,12 +418,11 @@ def graph(emotion_dic):
     matplotlib.use("Agg")
 
 def draw_english(text):
-    english_list = re.findall(r"[A-Za-z]+",text)
-    japanese_list = []
+    # 英単語を検出し、全て大文字の単語を除外
+    english_list = [word for word in re.findall(r"[A-Za-z]+",text) if not word.isupper()]
     for english in english_list:
-        japanese_list.append(alkana.get_kana(english))
-    for i in range(len(english_list)):
-        if japanese_list[i] == None:
-            japanese_list[i] = english_list[i]
-        text=text.replace(english_list[i],japanese_list[i])
+        japanese = alkana.get_kana(english)
+        if japanese:
+            text = text.replace(english,japanese)
+        # カタカナ変換がない場合、元の単語をそのまま使用
     return text
