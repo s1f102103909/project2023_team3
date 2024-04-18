@@ -3,7 +3,6 @@ openai
 opencv-python
 deepl
 moviepy
-PyAudio
 matplotlib
 pydub
 requests
