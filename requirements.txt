@@ -6,6 +6,4 @@ moviepy
 PyAudio
 matplotlib
 pydub
---upgrade wheel
--U alkana
 requests
