@@ -1,0 +1,11 @@
+django
+openai
+opencv-python
+deepl
+moviepy
+PyAudio
+matplotlib
+pydub
+--upgrade wheel
+-U alkana
+requests
