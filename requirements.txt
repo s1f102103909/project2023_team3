@@ -6,3 +6,5 @@ moviepy
 matplotlib
 pydub
 requests
+langchain
+pyaudio
