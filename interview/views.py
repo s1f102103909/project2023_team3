@@ -58,6 +58,7 @@ voicebox_end_time = []  #VoiceBoxの喋り終わりの時間の配列
 audio_dir = "cutaudio"
 
 #ログイン
+@csrf_exempt
 def Login(request):
     # POST
     print("se")
