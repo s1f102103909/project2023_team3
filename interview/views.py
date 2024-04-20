@@ -249,7 +249,16 @@ def langchain_GPT(text):
 # フレーム生成・返却する処理
 def generate_frame():
     global frame, width, height, fps, out
-    capture = cv2.VideoCapture(0)
+    for camera_number in range(0, 10):
+        try:
+            capture = cv2.VideoCapture(camera_number)
+            ret, frame = capture.read()
+        except:
+            ret = False
+        if ret == True:
+            print("success")
+            print(camera_number)
+            break
     width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     capture.set(cv2.CAP_PROP_FPS, 30)
